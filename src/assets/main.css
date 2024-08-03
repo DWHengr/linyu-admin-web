@@ -4,4 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    --primary-color: #4C9BFF;
+}
 

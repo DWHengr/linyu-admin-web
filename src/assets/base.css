@@ -9,3 +9,17 @@ body {
     padding: 0;
     color: #1F1F1F;
 }
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: rgba(117, 117, 117, 0.8);
+}

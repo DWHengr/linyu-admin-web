@@ -5,8 +5,8 @@
     <div class="login-content">
       <div class="login-box">
         <div class="title">
-          <div style="font-size: 40px;font-weight: 600;line-height: 40px">登录系统</div>
-          <div style="font-size: 20px;margin-left: 10px;color: #8D8D8D;line-height: 20px">欢迎使用林语管理端</div>
+          <div class="text-[40px] font-[600] leading-[40px]">登录系统</div>
+          <div class="text-[20px] ml-[10px] text-[#8D8D8D] leading-[20px]">欢迎使用林语管理端</div>
         </div>
         <div class="info">
           <div class="custom-input">
@@ -16,7 +16,10 @@
             <div style="margin-left: 10px">请输入密码</div>
           </div>
         </div>
-        <div class="operate">
+        <div
+            class="operate"
+            @click="onLogin"
+        >
           登 录
         </div>
       </div>
@@ -31,6 +34,16 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import {useRouter} from "vue-router";
+
+const router = useRouter()
+
+let onLogin = () => {
+  router.push("/index")
+}
+</script>
 
 <style lang="less" scoped>
 .login-container {
@@ -112,16 +125,14 @@
         font-size: 24px;
         font-weight: 600;
         color: #FFFFFF;
-        background-color: #4C9BFF;
+        background-color: var(--primary-color);
         border-radius: 5px;
         display: flex;
         justify-content: center;
         align-items: center;
+        cursor: pointer;
       }
     }
   }
 }
 </style>
-
-<script setup>
-</script>
