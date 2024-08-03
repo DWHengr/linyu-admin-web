@@ -1,32 +1,36 @@
 <template>
   <div class="home-index">
     <div class="navigation-top">
-      <img alt="" src="/title.png" style="height: 50px; margin-left:10px">
+      <img alt="" src="/title.png" class="ml-[10px] h-[50px]">
       <div class="user-operate">
-        <div style="width: 40px; height: 40px; border-radius: 40px; background-color: #4C9BFF"></div>
-        <div style="margin-right: 10px; margin-left: 10px">admin</div>
-        <i class="iconfont icon-tuichu" style="font-size: 24px; color: #4C9BFF"></i>
+        <div class="w-[40px] h-[40px] rounded-[40px] bg-[var(--primary-color)]"></div>
+        <div class="mx-[10px]">admin</div>
+        <i class="iconfont icon-tuichu text-[var(--primary-color)]" style="font-size: 24px"></i>
       </div>
     </div>
     <div class="content-container">
-      <div class="navigation-left">
-        <div
-            v-for="(item, index) in navigationData"
-            class="navigation-item-container"
-            :key="index"
-            :class="{selected: currentSelectOption === index}"
-        >
+      <div class="navigation-container">
+        <div class="navigation-left">
           <div
-              class="navigation-item"
+              v-for="(item, index) in navigationData"
+              class="navigation-item-container"
+              :key="index"
               :class="{selected: currentSelectOption === index}"
-              @click="() => handlerOptionClick(index)"
           >
-            <i class="navigation-item-icon" :class="`iconfont ${item.icon}`"></i>
-            <div class="navigation-item-label">{{ item.label }}</div>
+            <div
+                class="navigation-item"
+                :class="{selected: currentSelectOption === index}"
+                @click="() => handlerOptionClick(index)"
+            >
+              <i class="navigation-item-icon" :class="`iconfont ${item.icon}`"></i>
+              <div class="navigation-item-label">{{ item.label }}</div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="content"></div>
+      <div class="content">
+        <RouterView/>
+      </div>
     </div>
   </div>
 </template>
@@ -78,7 +82,7 @@ let handlerOptionClick = (index) => {
 };
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
 .home-index {
   width: 100vw;
   height: 100vh;
@@ -87,12 +91,14 @@ let handlerOptionClick = (index) => {
   flex-direction: column;
 
   .navigation-top {
-    width: 100vw;
-    height: 70px;
+    width: auto;
+    height: 60px;
     background-color: #F9FBFF;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
+    user-select: none;
 
     .user-operate {
       display: flex;
@@ -102,78 +108,90 @@ let handlerOptionClick = (index) => {
   }
 
   .content-container {
-    flex: 1;
-    width: 200px;
-    background-color: #F9FBFF;
-    transition: width 0.3s ease;
+    display: flex;
+    height: 100%;
+    overflow: hidden;
 
-    .navigation-left {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+    .navigation-container {
+      width: 200px;
+      min-width: 60px;
+      background-color: #F9FBFF;
+      transition: width 0.3s ease;
+      flex-shrink: 0;
 
-      .navigation-item-container {
-        height: 40px;
-        width: 100%;
+      .navigation-left {
+        margin-top: 5px;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        margin: 5px 0;
-        box-sizing: border-box;
-        border-right: transparent 3px solid;
+        justify-content: center;
 
-        .navigation-item {
-          height: 100%;
-          width: 80%;
-          background-color: #ffffff;
-          border-radius: 5px;
+        .navigation-item-container {
+          height: 40px;
+          width: 100%;
           display: flex;
+          flex-direction: column;
           align-items: center;
-          user-select: none;
-          border: #f3f3f3 1px solid;
-          cursor: pointer;
-          font-weight: 600;
-          letter-spacing: .5px;
+          margin: 5px 0;
+          box-sizing: border-box;
+          border-right: transparent 3px solid;
 
-          .navigation-item-icon {
-            font-size: 20px;
-            margin: 0 10px;
-          }
+          .navigation-item {
+            height: 100%;
+            width: 80%;
+            background-color: #ffffff;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            user-select: none;
+            border: #f3f3f3 1px solid;
+            cursor: pointer;
+            font-weight: 600;
+            letter-spacing: .5px;
 
-          .navigation-item-label {
-            white-space: nowrap;
-            opacity: 1;
-            transition: opacity .6s ease, width .6s ease, visibility .6s ease;
+            .navigation-item-icon {
+              font-size: 20px;
+              margin: 0 10px;
+            }
+
+            .navigation-item-label {
+              white-space: nowrap;
+              opacity: 1;
+              transition: opacity .3s ease, width .3s ease, visibility .3s ease;
+            }
+
+            &.selected {
+              color: #FFFFFF;
+              background-color: var(--primary-color);
+            }
           }
 
           &.selected {
-            color: #FFFFFF;
-            background-color: #4C9BFF;
+            border-right: var(--primary-color) 3px solid;
           }
-        }
-
-        &.selected {
-          border-right: #4C9BFF 3px solid;
         }
       }
     }
 
     .content {
+      flex: 1;
+      background-color: #EDF2F9;
+      padding: 10px;
+      overflow-y: auto;
     }
   }
 
-  @media (max-width: 1200px) {
-    .content-container {
-      width: 80px;
-    }
+  @media (max-width: 1400px) {
+    .navigation-container {
+      width: 60px !important;
 
-    .navigation-item {
-      justify-content: center;
+      .navigation-item {
+        justify-content: center !important;
 
-      .navigation-item-label {
-        opacity: 0 !important;
-        width: 0 !important;
-        visibility: hidden !important;
+        .navigation-item-label {
+          opacity: 0 !important;
+          width: 0 !important;
+          visibility: hidden !important;
+        }
       }
     }
   }
