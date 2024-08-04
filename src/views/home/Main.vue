@@ -63,7 +63,7 @@
       <div class="text-[20px] font-[600] mb-[10px] h-[30px] select-none">今日登录详情</div>
       <div class="login-info">
         <div v-for="(item,index) in loginDetailsData"
-             class="login-info-cord"
+             class="login-info-card"
              :class="{odd:index%2!==0}"
         >
           <div class="flex items-center">
@@ -339,7 +339,7 @@ onUnmounted(() => {
       padding-right: 5px;
       overflow-y: scroll;
 
-      .login-info-cord {
+      .login-info-card {
         display: flex;
         height: 70px;
         padding: 0 20px;

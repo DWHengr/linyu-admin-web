@@ -41,7 +41,7 @@ import {useRouter} from "vue-router";
 const router = useRouter()
 
 let onLogin = () => {
-  router.push("/index")
+  router.push("/home")
 }
 </script>
 

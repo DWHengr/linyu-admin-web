@@ -20,7 +20,7 @@
             <div
                 class="navigation-item"
                 :class="{selected: currentSelectOption === index}"
-                @click="() => handlerOptionClick(index)"
+                @click="() => handlerOptionClick(index,item)"
             >
               <i class="navigation-item-icon" :class="`iconfont ${item.icon}`"></i>
               <div class="navigation-item-label">{{ item.label }}</div>
@@ -37,13 +37,14 @@
 
 <script setup>
 import {ref} from "vue";
+import router from "@/router/index.js";
 
 let currentSelectOption = ref(0);
 let navigationData = [
   {
     label: "首页",
     icon: "icon-shouye",
-    route: "/home"
+    route: "/main"
   },
   {
     label: "用户管理",
@@ -77,8 +78,9 @@ let navigationData = [
   }
 ];
 
-let handlerOptionClick = (index) => {
+let handlerOptionClick = (index, item) => {
   currentSelectOption.value = index;
+  router.push('/home' + item.route)
 };
 </script>
 
