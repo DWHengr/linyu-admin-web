@@ -39,8 +39,8 @@
           class="bg-[#fff] flex flex-col h-[290px] w-[280px] p-[10px] rounded-[10px] mr-[10px] mb-[10px] flex-shrink-0"
       >
         <div
-            class="flex flex-col h-[190px] bg-opacity-10 p-[10px] rounded-[10px] items-center mb-[10px]"
-            :class="item.sex==='男'?'bg-[#4C9BFF]':'bg-[#FFA0CF]'"
+            class="flex flex-col h-[190px] bg-opacity-10 p-[10px] rounded-[10px] items-center mb-[10px] relative"
+            :class="`${item.sex==='男'?'bg-[#4C9BFF]':'bg-[#FFA0CF]'} ${daysDifference(item.createTime)>1?'':'bg-[#FFB800]'}`"
         >
           <div class="flex justify-between text-[14px] leading-[14px] w-full select-none">
             <div class="flex items-center w-full">
@@ -58,7 +58,9 @@
               />
             </div>
           </div>
-          <div class="flex flex-col items-center">
+          <div v-if="daysDifference(item.createTime) <= 0"
+               class="user-info-bg bg-cover bg-center h-[80px] w-full absolute"/>
+          <div class="flex flex-col items-center z-[1]">
             <img alt="" :src="item.portrait"
                  class="w-[60px] h-[60px] rounded-[60px] select-none">
             <div class="text-[18px]">{{ item.name }}</div>
@@ -71,7 +73,7 @@
         <div class="flex flex-1 justify-between items-center select-none">
           <div class="flex flex-col justify-between items-center">
             <div class="font-[600] flex items-center text-[15px] h-[30px]">
-              {{ daysDifference(item.createTime) }}天
+              {{ daysDifference(item.createTime) > 0 ? daysDifference(item.createTime) : "当" }}天
             </div>
             <div class="text-[14px] text-[#ababab] h-[30px] flex items-center">加入时长</div>
           </div>
@@ -94,7 +96,12 @@
       </div>
     </div>
     <div class="h-[40px] flex justify-end mt-[20px] items-center flex-shrink-0">
-      <div class="h-full w-[200px] bg-white">分页</div>
+      <div>
+        <CustomPagination
+            :total="101"
+            @update:pagination="(v)=>console.log(v)"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -104,6 +111,7 @@ import {ref, watch} from "vue";
 import CustomSwitchButton from "@/components/CustomSwitchButton.vue";
 import CustomIconfontButton from "@/components/CustomIconfontButton.vue";
 import {calculateAge, daysDifference} from "@/utils/data.js";
+import CustomPagination from "@/components/CustomPagination.vue";
 
 const searchValue = ref("")
 const selectedOption = ref('none');
@@ -191,7 +199,7 @@ let usersData = [
     status: "ban",
     online: false,
     sex: "男",
-    createTime: "2021-10-20",
+    createTime: "2024-8-5",
   },
   {
     name: "王小3二",
@@ -340,5 +348,9 @@ watch(selectedOption, (value) => {
   min-width: 900px;
   display: flex;
   flex-direction: column;
+
+  .user-info-bg {
+    background-image: url('@/assets/icon/user-info-bg.png')
+  }
 }
 </style>

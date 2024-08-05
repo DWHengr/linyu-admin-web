@@ -12,15 +12,15 @@
       <div class="navigation-container">
         <div class="navigation-left">
           <div
-              v-for="(item, index) in navigationData"
+              v-for="item in navigationData"
               class="navigation-item-container"
-              :key="index"
-              :class="{selected: currentSelectOption === index}"
+              :key="item.name"
+              :class="{selected: route.name===item.name}"
           >
             <div
                 class="navigation-item"
-                :class="{selected: currentSelectOption === index}"
-                @click="() => handlerOptionClick(index,item)"
+                :class="{selected: route.name===item.name}"
+                @click="() => handlerOptionClick(item)"
             >
               <i class="navigation-item-icon" :class="`iconfont ${item.icon}`"></i>
               <div class="navigation-item-label">{{ item.label }}</div>
@@ -36,50 +36,57 @@
 </template>
 
 <script setup>
-import {ref} from "vue";
 import router from "@/router/index.js";
+import {useRoute} from "vue-router";
 
-let currentSelectOption = ref(0);
+const route = useRoute();
+
 let navigationData = [
   {
+    name: "main",
     label: "首页",
     icon: "icon-shouye",
     route: "/main"
   },
   {
+    name: "user",
     label: "用户管理",
     icon: "icon-yonghu",
     route: "/user"
   },
   {
+    name: "group",
     label: "分组管理",
     icon: "icon-fenzhu",
     route: "/group"
   },
   {
+    name: "message",
     label: "消息管理",
     icon: "icon-xiaoxi",
     route: "/message"
   },
   {
+    name: "notify",
     label: "通知管理",
     icon: "icon-tongzhi",
     route: "/notify"
   },
   {
+    name: "talk",
     label: "说说管理",
     icon: "icon-shuoshuo",
     route: "/talk"
   },
   {
+    name: "set",
     label: "系统管理",
     icon: "icon-xitong",
     route: "/set"
   }
 ];
 
-let handlerOptionClick = (index, item) => {
-  currentSelectOption.value = index;
+let handlerOptionClick = (item) => {
   router.push('/home' + item.route)
 };
 </script>
@@ -149,6 +156,10 @@ let handlerOptionClick = (index, item) => {
             cursor: pointer;
             font-weight: 600;
             letter-spacing: .5px;
+
+            &:hover {
+              background-color: #EDF2F9;
+            }
 
             .navigation-item-icon {
               font-size: 20px;

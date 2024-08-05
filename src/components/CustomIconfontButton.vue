@@ -15,11 +15,13 @@
   </div>
 </template>
 <script setup>
+import {defineProps, defineEmits} from 'vue';
+
 const props = defineProps({
   icon: String,
   iconStyle: String,
   class: String,
-  style: String,
+  style: Object,
   iconClass: String,
   label: String,
 })
