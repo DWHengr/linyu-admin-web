@@ -1,9 +1,27 @@
 <template>
+  <Chat/>
   <div class="home-index">
     <div class="navigation-top">
-      <img alt="" src="/title.png" class="ml-[10px] h-[50px]">
+      <img alt="" src="/title.png" class="ml-[10px] h-[50px] ">
       <div class="user-operate">
-        <div class="w-[40px] h-[40px] rounded-[40px] bg-[var(--primary-color)]"></div>
+        <div class="flex mr-[15px] px-[10px] py-[5px] bg-white rounded-[10px] border-[1px] border-[#EDF2F9]">
+          <div
+              class="w-[32px] h-[32px] flex justify-center items-center cursor-pointer hover:bg-[#EDF2F9] mr-[5px] rounded-[5px]"
+          >
+            <img alt="" src="@/assets/icon/notify.png" style="width: 26px;height: 26px">
+          </div>
+          <div
+              class="w-[32px] h-[32px] flex justify-center items-center cursor-pointer hover:bg-[#EDF2F9] rounded-[5px]"
+              @click="showChat()"
+          >
+            <img alt="" src="@/assets/icon/chat.png" style="width: 26px;height: 26px">
+          </div>
+        </div>
+        <img
+            alt=""
+            src="https://mms2.baidu.com/it/u=4277793684,4247804232&fm=253&app=138&f=JPEG?w=125&h=125"
+            style="width: 40px;height: 40px;border-radius: 40px"
+        >
         <div class="mx-[10px]">admin</div>
         <i class="iconfont icon-tuichu text-[var(--primary-color)]" style="font-size: 24px"></i>
       </div>
@@ -38,8 +56,11 @@
 <script setup>
 import router from "@/router/index.js";
 import {useRoute} from "vue-router";
+import Chat from "@/use/UseChat/Chat.vue";
+import {useChat} from "@/use/UseChat/useChat.js";
 
 const route = useRoute();
+const {showChat} = useChat();
 
 let navigationData = [
   {
