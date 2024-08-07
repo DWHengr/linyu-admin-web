@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import {nextTick, ref, watch} from 'vue';
+import {nextTick, defineProps, defineModel, ref, watch} from 'vue';
 
 const props = defineProps({
   options: {
@@ -107,6 +107,7 @@ watch(isDropdownVisible, (newVal) => {
 .label {
   border-radius: 5px;
   height: 24px;
+  line-height: 24px;
   width: 100%;
   box-sizing: border-box;
   outline: none;

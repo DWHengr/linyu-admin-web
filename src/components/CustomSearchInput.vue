@@ -16,7 +16,7 @@ import {defineProps, defineEmits} from 'vue';
 
 const props = defineProps({
   placeholder: String,
-  style: String,
+  style: Object,
   class: String,
 })
 const value = defineModel('value')

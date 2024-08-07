@@ -75,30 +75,30 @@ let navigationData = [
     icon: "icon-yonghu",
     route: "/user"
   },
-  {
-    name: "group",
-    label: "分组管理",
-    icon: "icon-fenzhu",
-    route: "/group"
-  },
-  {
-    name: "message",
-    label: "消息管理",
-    icon: "icon-xiaoxi",
-    route: "/message"
-  },
+  // {
+  //   name: "group",
+  //   label: "分组管理",
+  //   icon: "icon-fenzhu",
+  //   route: "/group"
+  // },
+  // {
+  //   name: "message",
+  //   label: "消息管理",
+  //   icon: "icon-xiaoxi",
+  //   route: "/message"
+  // },
   {
     name: "notify",
     label: "通知管理",
     icon: "icon-tongzhi",
     route: "/notify"
   },
-  {
-    name: "talk",
-    label: "说说管理",
-    icon: "icon-shuoshuo",
-    route: "/talk"
-  },
+  // {
+  //   name: "talk",
+  //   label: "说说管理",
+  //   icon: "icon-shuoshuo",
+  //   route: "/talk"
+  // },
   {
     name: "set",
     label: "系统管理",

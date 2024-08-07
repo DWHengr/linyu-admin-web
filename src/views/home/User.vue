@@ -88,7 +88,7 @@
           </div>
           <div class="flex flex-col justify-between items-center">
             <div class="font-[600] flex items-center text-[20px] h-[30px]">
-              <i class="iconfont icon-gengduo " style="font-size: 30px"/>
+              <i class="iconfont icon-gengduo" @click="showChat()" style="font-size: 30px"/>
             </div>
             <div class="text-[14px] text-[#ababab] h-[30px] flex items-center">更多操作</div>
           </div>
@@ -112,9 +112,12 @@ import CustomSwitchButton from "@/components/CustomSwitchButton.vue";
 import CustomIconfontButton from "@/components/CustomIconfontButton.vue";
 import {calculateAge, daysDifference} from "@/utils/data.js";
 import CustomPagination from "@/components/CustomPagination.vue";
+import {useChat} from "@/use/UseChat/useChat.js";
 
 const searchValue = ref("")
 const selectedOption = ref('none');
+
+const {showChat} = useChat();
 
 let usersData = [
   {
