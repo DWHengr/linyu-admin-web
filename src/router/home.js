@@ -8,5 +8,10 @@ export default [
         path: 'user',
         name: 'user',
         component: () => import('@/views/home/User.vue')
+    },
+    {
+        path: 'notify',
+        name: 'notify',
+        component: () => import('@/views/home/Notify.vue')
     }
 ]
