@@ -1,9 +1,9 @@
 <template>
-
-  <div v-if="isVisible" class="chat-overlay" @click.prevent="closeChat">
-    <CustomChatList @click.stop @close="closeChat"/>
-  </div>
-
+  <Transition name="fade">
+    <div v-if="isVisible" class="chat-overlay" @click.prevent="closeChat">
+      <CustomChatList @click.stop @close="closeChat"/>
+    </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -25,5 +25,15 @@ const {isVisible, chatData, closeChat} = inject('chatStore');
   justify-content: center;
   align-items: center;
   z-index: 1000;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
