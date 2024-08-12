@@ -93,18 +93,24 @@ let navigationData = [
     icon: "icon-tongzhi",
     route: "/notify"
   },
+  {
+    name: "conversation",
+    label: "会话管理",
+    icon: "icon-xiaoxi",
+    route: "/conversation"
+  },
   // {
   //   name: "talk",
   //   label: "说说管理",
   //   icon: "icon-shuoshuo",
   //   route: "/talk"
   // },
-  {
-    name: "set",
-    label: "系统管理",
-    icon: "icon-xitong",
-    route: "/set"
-  }
+  // {
+  //   name: "set",
+  //   label: "系统管理",
+  //   icon: "icon-xitong",
+  //   route: "/set"
+  // }
 ];
 
 let handlerOptionClick = (item) => {

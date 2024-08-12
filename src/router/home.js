@@ -13,5 +13,9 @@ export default [
         path: 'notify',
         name: 'notify',
         component: () => import('@/views/home/Notify.vue')
+    }, {
+        path: 'conversation',
+        name: 'conversation',
+        component: () => import('@/views/home/Conversation.vue')
     }
 ]
