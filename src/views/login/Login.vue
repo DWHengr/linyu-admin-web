@@ -9,12 +9,8 @@
           <div class="text-[20px] ml-[10px] text-[#8D8D8D] leading-[20px]">欢迎使用林语管理端</div>
         </div>
         <div class="info">
-          <div class="custom-input">
-            <div style="margin-left: 10px">请输入用户名</div>
-          </div>
-          <div class="custom-input">
-            <div style="margin-left: 10px">请输入密码</div>
-          </div>
+          <CustomInput v-model:value="account" placeholder="请输入账号"/>
+          <CustomInput v-model:value="password" type="password" placeholder="请输入密码"/>
         </div>
         <div
             class="operate"
@@ -37,11 +33,45 @@
 
 <script setup>
 import {useRouter} from "vue-router";
+import CustomInput from "@/components/CustomInput.vue";
+import {useToast} from '@/components/ToastProvider.vue';
+import {ref} from "vue";
+import LoginApi from "@/api/login.js";
+import {JSEncrypt} from "jsencrypt";
 
 const router = useRouter()
+const showToast = useToast()
+const account = ref("")
+const password = ref("")
 
-let onLogin = () => {
-  router.push("/home")
+let onLogin = async () => {
+  if (!account.value) {
+    showToast("账号不能为空~", true)
+    return
+  }
+  if (!password.value) {
+    showToast("密码不能为空~", true)
+    return
+  }
+  let keyData = await LoginApi.publicKey();
+  if (keyData.code !== 0) {
+    return
+  }
+  const encrypt = new JSEncrypt();
+  encrypt.setPublicKey(keyData.data);
+  const encryptedPassword = encrypt.encrypt(password.value);
+  LoginApi.login({account: account.value, password: encryptedPassword})
+      .then((res) => {
+        if (res.code === 0) {
+          sessionStorage.setItem('x-token', res.data.token)
+          router.push("/home")
+        } else {
+          showToast(res.msg, true)
+        }
+      })
+      .catch((res) => {
+        showToast(res.message, true)
+      })
 }
 </script>
 
