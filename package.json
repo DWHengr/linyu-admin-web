@@ -9,7 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "axios": "^1.7.7",
     "echarts": "^5.5.1",
+    "jsencrypt": "^3.3.2",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3"
   },
