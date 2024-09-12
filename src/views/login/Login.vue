@@ -13,10 +13,10 @@
           <CustomInput v-model:value="password" type="password" placeholder="请输入密码"/>
         </div>
         <div
-            class="operate"
+            :class="['operate', { logging: logging }]"
             @click="onLogin"
         >
-          登 录
+          {{ logging ? '登 录' : '登 录 中' }}
         </div>
       </div>
       <div class="web-info">
@@ -43,6 +43,7 @@ const router = useRouter()
 const showToast = useToast()
 const account = ref("")
 const password = ref("")
+const logging = ref(false)
 
 let onLogin = async () => {
   if (!account.value) {
@@ -53,6 +54,7 @@ let onLogin = async () => {
     showToast("密码不能为空~", true)
     return
   }
+  logging.value = true
   let keyData = await LoginApi.publicKey();
   if (keyData.code !== 0) {
     return
@@ -64,6 +66,8 @@ let onLogin = async () => {
       .then((res) => {
         if (res.code === 0) {
           sessionStorage.setItem('x-token', res.data.token)
+          sessionStorage.setItem('portrait', res.data.portrait)
+          sessionStorage.setItem('username', res.data.username)
           router.push("/home")
         } else {
           showToast(res.msg, true)
@@ -71,6 +75,9 @@ let onLogin = async () => {
       })
       .catch((res) => {
         showToast(res.message, true)
+      })
+      .finally(() => {
+        logging.value = false
       })
 }
 </script>
@@ -81,6 +88,7 @@ let onLogin = async () => {
   width: 100%;
   position: absolute;
   display: flex;
+  min-height: 800px;
 
   .poster-img {
     height: 100vh;
@@ -161,6 +169,11 @@ let onLogin = async () => {
         justify-content: center;
         align-items: center;
         cursor: pointer;
+        user-select: none;
+
+        &.logging, &:hover {
+          background-color: rgba(76, 155, 255, 0.8);
+        }
       }
     }
   }

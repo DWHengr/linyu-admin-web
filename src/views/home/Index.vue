@@ -19,11 +19,13 @@
         </div>
         <img
             alt=""
-            src="https://mms2.baidu.com/it/u=4277793684,4247804232&fm=253&app=138&f=JPEG?w=125&h=125"
+            :src="currentUserInfo.portrait"
             style="width: 40px;height: 40px;border-radius: 40px"
         >
-        <div class="mx-[10px]">admin</div>
-        <i class="iconfont icon-tuichu text-[var(--primary-color)]" style="font-size: 24px"></i>
+        <div class="mx-[10px]">{{ currentUserInfo.username }}</div>
+        <i class="iconfont icon-tuichu text-[var(--primary-color)] cursor-pointer"
+           @click="handlerLogout"
+           style="font-size: 24px"/>
       </div>
     </div>
     <div class="content-container">
@@ -58,9 +60,11 @@ import router from "@/router/index.js";
 import {useRoute} from "vue-router";
 import Chat from "@/use/UseChat/Chat.vue";
 import {useChat} from "@/use/UseChat/useChat.js";
+import {onMounted, reactive} from "vue";
 
 const route = useRoute();
 const {showChat} = useChat();
+const currentUserInfo = reactive({username: "", portrait: ""})
 
 let navigationData = [
   {
@@ -112,6 +116,16 @@ let navigationData = [
   //   route: "/set"
   // }
 ];
+
+const handlerLogout = () => {
+  sessionStorage.removeItem("x-token")
+  router.push('/')
+}
+
+onMounted(() => {
+  currentUserInfo.username = sessionStorage.getItem("username")
+  currentUserInfo.portrait = sessionStorage.getItem("portrait")
+})
 
 let handlerOptionClick = (item) => {
   router.push('/home' + item.route)
