@@ -16,7 +16,7 @@
             :class="['operate', { logging: logging }]"
             @click="onLogin"
         >
-          {{ logging ? '登 录' : '登 录 中' }}
+          {{ !logging ? '登 录' : '登 录 中' }}
         </div>
       </div>
       <div class="web-info">

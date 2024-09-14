@@ -64,7 +64,7 @@
 <script setup>
 
 import CustomSearchInput from "@/components/CustomSearchInput.vue";
-import {ref} from "vue";
+import {ref, defineEmits} from "vue";
 import CustomChatFrame from "@/components/CustomChatFrame/CustomChatFrame.vue";
 import CustomIconfontButton from "@/components/CustomIconfontButton.vue";
 

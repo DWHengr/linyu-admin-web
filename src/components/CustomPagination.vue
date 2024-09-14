@@ -59,6 +59,14 @@ watch(interPageSize, (pageSize) => {
     {immediate: true}
 )
 
+watch(() => props.total, () => {
+      if (props.total / interPageSize.value < interCurrentPage.value) {
+        interCurrentPage.value = 1
+        emit("update:pagination", {pageSize: interPageSize.value, currentPage: interCurrentPage.value})
+      }
+    }
+)
+
 let handlerSetCurrentPage = () => {
   let cp = interCurrentPage.value;
   if (cp > pageNum.value) {

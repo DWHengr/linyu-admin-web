@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import {defineProps, defineEmits} from 'vue';
+import {defineProps, defineEmits, defineModel} from 'vue';
 
 const props = defineProps({
   placeholder: String,

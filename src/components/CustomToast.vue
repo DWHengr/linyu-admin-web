@@ -6,7 +6,7 @@
   </div>
 </template>
 <script setup>
-import {defineProps, onBeforeUnmount, onMounted} from "vue";
+import {defineProps, onBeforeUnmount, defineEmits, onMounted} from "vue";
 
 const props = defineProps({
   message: String,
@@ -71,6 +71,6 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   pointer-events: none;
-  z-index: 1111;
+  z-index: 1211;
 }
 </style>
