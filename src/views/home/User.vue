@@ -1,5 +1,25 @@
 <template>
   <div class="user-container">
+    <CustomModal v-model:is-open="addUserIsOpen">
+      <div class="add-user">
+        <div class="font-semibold text-[20px] mb-[20px]">添加用户</div>
+        <div>
+          <div class="add-user-label">账号</div>
+          <CustomFormInput v-model:value="addUserInfo.account" :limit="30" is-only-chars required
+                           placeholder="请输入用户账号~"/>
+          <div class="add-user-label">用户名</div>
+          <CustomFormInput v-model:value="addUserInfo.username" :limit="30" required placeholder="请输入用户名~"/>
+          <div class="add-user-label">邮箱</div>
+          <CustomFormInput v-model:value="addUserInfo.email" type="email" placeholder="请输入用户邮箱~" required/>
+          <div class="add-user-label">手机号</div>
+          <CustomFormInput v-model:value="addUserInfo.phone" type="tel" placeholder="请输入用户手机号~"/>
+        </div>
+        <div class="w-[100%] flex justify-end mt-[30px]">
+          <CustomButton type="minor" style="width: 80px" @click="()=>addUserIsOpen=false">取 消</CustomButton>
+          <CustomButton style="width: 80px;margin-left: 10px" @click="onCreateUser">确 定</CustomButton>
+        </div>
+      </div>
+    </CustomModal>
     <div class="border-white-0">
       <CustomSearchInput
           v-model:value="searchValue"
@@ -31,9 +51,18 @@
             icon="icon-tianjia"
             label="添加用户"
             style="background-color: #4C9BFF;color: #FFFFFF"
+            @click="()=>addUserIsOpen=true"
         />
       </div>
     </div>
+    <CustomPopover placement="bottom" v-model:is-visible="moreIsVisible" :position="morePosition">
+      <div class="user-options">
+        <div class="option">发送消息</div>
+        <div class="option">禁用</div>
+        <div class="option">修改信息</div>
+        <div class="option">删除</div>
+      </div>
+    </CustomPopover>
     <div class="flex w-full flex-wrap overflow-y-scroll">
       <div
           v-for="item in usersData?.records"
@@ -91,7 +120,11 @@
           </div>
           <div class="flex flex-col justify-between items-center">
             <div class="font-[600] flex items-center text-[20px] h-[30px]">
-              <i class="iconfont icon-gengduo" @click="showChat()" style="font-size: 30px"/>
+              <i
+                  class="iconfont icon-gengduo hover:bg-[#EDF2F9] rounded-[5px] cursor-pointer"
+                  style="font-size: 30px"
+                  @click="handlerSetMorePosition"
+              />
             </div>
             <div class="text-[14px] text-[#ababab] h-[30px] flex items-center">更多操作</div>
           </div>
@@ -110,21 +143,29 @@
 </template>
 <script setup>
 import CustomSearchInput from "@/components/CustomSearchInput.vue";
-import {onMounted, ref, watch} from "vue";
+import {onMounted, ref, triggerRef, watch} from "vue";
 import CustomSwitchButton from "@/components/CustomSwitchButton.vue";
 import CustomIconfontButton from "@/components/CustomIconfontButton.vue";
 import {calculateAge, getDateParts, daysDifference} from "@/utils/data.js";
 import CustomPagination from "@/components/CustomPagination.vue";
 import {useChat} from "@/use/UseChat/useChat.js";
 import UserAPi from "@/api/user.js";
+import CustomModal from "@/components/CustomModal.vue";
+import CustomFormInput from "@/components/CustomFormInput.vue";
+import CustomButton from "@/components/CustomButton.vue";
+import {useToast} from '@/components/ToastProvider.vue';
+import CustomPopover from "@/components/CustomPopover.vue";
 
 const searchValue = ref("")
 const selectedOption = ref('none');
-
 const {showChat} = useChat();
-
-let usersData = ref({total: 0, record: []})
-let pagination = ref(null)
+const showToast = useToast()
+const usersData = ref({total: 0, record: []})
+const pagination = ref(null)
+const addUserIsOpen = ref(false)
+const addUserInfo = ref({account: '', username: '', sex: '', birthday: '', email: '', phone: ''})
+const moreIsVisible = ref(false)
+const morePosition = ref(null)
 
 const onUserPage = () => {
   let onlineStatus = selectedOption.value === "optionOne" ? "online" : "offline";
@@ -149,6 +190,35 @@ watch([pagination, searchValue, selectedOption], () => {
 watch(selectedOption, (value) => {
   console.log(value)
 })
+
+const onCreateUser = () => {
+  if (addUserInfo.value.account &&
+      addUserInfo.value.username &&
+      addUserInfo.value.email) {
+    UserAPi.create(addUserInfo.value).then(res => {
+      if (res.code === 0) {
+        showToast("用户创建成功，密码已发送到该邮箱~")
+        addUserInfo.value = {account: '', username: '', sex: '', birthday: '', email: '', phone: ''}
+        addUserIsOpen.value = false
+        onUserPage()
+      } else {
+        showToast(res.msg, true)
+      }
+    })
+  } else {
+    showToast("信息填写不完整~", true)
+  }
+}
+
+const handlerSetMorePosition = (e) => {
+  e.stopPropagation()
+  const rect = e.target.getBoundingClientRect()
+  if (!moreIsVisible.value || (morePosition.value?.top === rect.top && morePosition.value?.left === rect.left)) {
+    moreIsVisible.value = !moreIsVisible.value
+  }
+  morePosition.value = {top: rect.top, left: rect.left, bottom: rect.bottom, right: rect.right}
+}
+
 </script>
 <style lang="less" scoped>
 .user-container {
@@ -158,6 +228,37 @@ watch(selectedOption, (value) => {
   min-width: 900px;
   display: flex;
   flex-direction: column;
+
+  .user-options {
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    width: 100px;
+    padding: 10px 5px;
+
+    .option {
+      padding: 4px 8px;
+      cursor: pointer;
+      border-radius: 5px;
+
+      &:hover {
+        background-color: #FFFFFF;
+      }
+    }
+  }
+
+  .add-user {
+    width: 500px;
+    max-height: 70vh;
+    background-color: #FFFFFF;
+    border-radius: 10px;
+    padding: 20px 40px;
+
+    .add-user-label {
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+  }
 
   .user-info-bg {
     background-image: url('@/assets/icon/user-info-bg.png')
