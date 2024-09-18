@@ -20,6 +20,14 @@
         </div>
       </div>
     </CustomModal>
+    <CustomDialog
+        title="删除"
+        v-model:is-open="delUserIsOpen"
+        @cancel="delUserIsOpen=false"
+        @ok="onDelUser"
+    >
+      确认删除该用户？
+    </CustomDialog>
     <div class="border-white-0">
       <CustomSearchInput
           v-model:value="searchValue"
@@ -58,9 +66,12 @@
     <CustomPopover placement="bottom" v-model:is-visible="moreIsVisible" :position="morePosition">
       <div class="user-options">
         <div class="option">发送消息</div>
-        <div class="option">禁用</div>
+        <div class="option" v-if="currentSelectedUser?.status === 'normal'" @click="onDisableUser">禁用</div>
+        <div class="option" v-if="currentSelectedUser?.status === 'disable'" @click="onUnDisableUser">解禁</div>
         <div class="option">修改信息</div>
-        <div class="option">删除</div>
+        <div class="option" v-if="currentSelectedUser?.role === 'admin'">取消管理员</div>
+        <div class="option" v-if="currentSelectedUser?.role !== 'admin'">设置管理员</div>
+        <div class="option" @click="()=>{delUserIsOpen=true;moreIsVisible=false}">删除</div>
       </div>
     </CustomPopover>
     <div class="flex w-full flex-wrap overflow-y-scroll">
@@ -72,7 +83,7 @@
             class="flex flex-col h-[190px] bg-opacity-10 p-[10px] rounded-[10px] items-center mb-[10px] relative"
             :class="`${item.sex==='男'?'bg-[#4C9BFF]':'bg-[#FFA0CF]'} ${daysDifference(item.createTime)>1?'':'bg-[#FFB800]'}`"
         >
-          <div class="flex justify-between text-[14px] leading-[14px] w-full select-none">
+          <div class="flex justify-between text-[14px] leading-[14px] w-full select-none mb-[2px]">
             <div class="flex items-center w-full">
               <div
                   class="w-[12px] h-[12px] rounded-[12px] mr-[4px]"
@@ -80,6 +91,9 @@
               />
               <div :class="item.isOnline&&'text-[var(--primary-color)] font-semibold'">
                 {{ item.isOnline ? '在线' : '离线' }}
+              </div>
+              <div v-if="item.role==='admin'" class="ml-[4px] flex items-center text-[var(--primary-color)]">
+                <i class="iconfont icon-guanliyuan" style="font-size: 18px;"/>
               </div>
             </div>
             <div class="flex flex-shrink-0">
@@ -123,7 +137,7 @@
               <i
                   class="iconfont icon-gengduo hover:bg-[#EDF2F9] rounded-[5px] cursor-pointer"
                   style="font-size: 30px"
-                  @click="handlerSetMorePosition"
+                  @click="(e)=>handlerSetMorePosition(e,item)"
               />
             </div>
             <div class="text-[14px] text-[#ababab] h-[30px] flex items-center">更多操作</div>
@@ -155,6 +169,7 @@ import CustomFormInput from "@/components/CustomFormInput.vue";
 import CustomButton from "@/components/CustomButton.vue";
 import {useToast} from '@/components/ToastProvider.vue';
 import CustomPopover from "@/components/CustomPopover.vue";
+import CustomDialog from "@/components/CustomDialog.vue";
 
 const searchValue = ref("")
 const selectedOption = ref('none');
@@ -166,6 +181,8 @@ const addUserIsOpen = ref(false)
 const addUserInfo = ref({account: '', username: '', sex: '', birthday: '', email: '', phone: ''})
 const moreIsVisible = ref(false)
 const morePosition = ref(null)
+const currentSelectedUser = ref(null)
+const delUserIsOpen = ref(false)
 
 const onUserPage = () => {
   let onlineStatus = selectedOption.value === "optionOne" ? "online" : "offline";
@@ -179,16 +196,48 @@ const onUserPage = () => {
   })
 }
 
+const onDelUser = () => {
+  UserAPi.delete({userId: currentSelectedUser.value.id}).then(res => {
+    if (res.code === 0) {
+      onUserPage()
+      showToast("删除成功~")
+      delUserIsOpen.value = false
+    } else {
+      showToast(res.msg, true)
+    }
+  })
+}
+
+const onDisableUser = () => {
+  UserAPi.disable({userId: currentSelectedUser.value.id}).then(res => {
+    if (res.code === 0) {
+      onUserPage()
+      showToast("禁用成功~")
+      moreIsVisible.value = false
+    } else {
+      showToast(res.msg, true)
+    }
+  })
+}
+
+const onUnDisableUser = () => {
+  UserAPi.unDisable({userId: currentSelectedUser.value.id}).then(res => {
+    if (res.code === 0) {
+      onUserPage()
+      showToast("解禁成功~")
+      moreIsVisible.value = false
+    } else {
+      showToast(res.msg, true)
+    }
+  })
+}
+
 onMounted(() => {
   onUserPage()
 })
 
 watch([pagination, searchValue, selectedOption], () => {
   onUserPage()
-})
-
-watch(selectedOption, (value) => {
-  console.log(value)
 })
 
 const onCreateUser = () => {
@@ -210,13 +259,14 @@ const onCreateUser = () => {
   }
 }
 
-const handlerSetMorePosition = (e) => {
+const handlerSetMorePosition = (e, user) => {
   e.stopPropagation()
   const rect = e.target.getBoundingClientRect()
   if (!moreIsVisible.value || (morePosition.value?.top === rect.top && morePosition.value?.left === rect.left)) {
     moreIsVisible.value = !moreIsVisible.value
   }
   morePosition.value = {top: rect.top, left: rect.left, bottom: rect.bottom, right: rect.right}
+  currentSelectedUser.value = user
 }
 
 </script>
@@ -240,6 +290,7 @@ const handlerSetMorePosition = (e) => {
       padding: 4px 8px;
       cursor: pointer;
       border-radius: 5px;
+      user-select: none;
 
       &:hover {
         background-color: #FFFFFF;
