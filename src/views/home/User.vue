@@ -2,13 +2,14 @@
   <div class="user-container">
     <CustomModal v-model:is-open="addUserIsOpen">
       <div class="add-user">
-        <div class="font-semibold text-[20px] mb-[20px]">添加用户</div>
+        <div class="font-semibold text-[20px] mb-[20px]">{{ currentSelectedUser ? "修改用户" : "添加用户" }}</div>
         <div>
           <div class="add-user-label">账号</div>
           <CustomFormInput v-model:value="addUserInfo.account" :limit="30" is-only-chars required
+                           :readonly="!!currentSelectedUser"
                            placeholder="请输入用户账号~"/>
           <div class="add-user-label">用户名</div>
-          <CustomFormInput v-model:value="addUserInfo.username" :limit="30" required placeholder="请输入用户名~"/>
+          <CustomFormInput v-model:value="addUserInfo.name" :limit="30" required placeholder="请输入用户名~"/>
           <div class="add-user-label">邮箱</div>
           <CustomFormInput v-model:value="addUserInfo.email" type="email" placeholder="请输入用户邮箱~" required/>
           <div class="add-user-label">手机号</div>
@@ -16,7 +17,7 @@
         </div>
         <div class="w-[100%] flex justify-end mt-[30px]">
           <CustomButton type="minor" style="width: 80px" @click="()=>addUserIsOpen=false">取 消</CustomButton>
-          <CustomButton style="width: 80px;margin-left: 10px" @click="onCreateUser">确 定</CustomButton>
+          <CustomButton style="width: 80px;margin-left: 10px" @click="onCreateOrUpdateUser">确 定</CustomButton>
         </div>
       </div>
     </CustomModal>
@@ -59,18 +60,19 @@
             icon="icon-tianjia"
             label="添加用户"
             style="background-color: #4C9BFF;color: #FFFFFF"
-            @click="()=>addUserIsOpen=true"
+            @click="handlerAddUser"
         />
       </div>
     </div>
     <CustomPopover placement="bottom" v-model:is-visible="moreIsVisible" :position="morePosition">
       <div class="user-options">
-        <div class="option">发送消息</div>
+        <div class="option" @click="()=>{showChat(currentSelectedUser.id);moreIsVisible=false}">发送消息</div>
         <div class="option" v-if="currentSelectedUser?.status === 'normal'" @click="onDisableUser">禁用</div>
         <div class="option" v-if="currentSelectedUser?.status === 'disable'" @click="onUnDisableUser">解禁</div>
-        <div class="option">修改信息</div>
+        <div class="option" @click="handlerEditUser">修改信息</div>
         <div class="option" v-if="currentSelectedUser?.role === 'admin'">取消管理员</div>
         <div class="option" v-if="currentSelectedUser?.role !== 'admin'">设置管理员</div>
+        <div class="option" @click="()=>{}">重置密码</div>
         <div class="option" @click="()=>{delUserIsOpen=true;moreIsVisible=false}">删除</div>
       </div>
     </CustomPopover>
@@ -178,7 +180,7 @@ const showToast = useToast()
 const usersData = ref({total: 0, record: []})
 const pagination = ref(null)
 const addUserIsOpen = ref(false)
-const addUserInfo = ref({account: '', username: '', sex: '', birthday: '', email: '', phone: ''})
+const addUserInfo = ref({account: '', name: '', sex: '', birthday: '', email: '', phone: ''})
 const moreIsVisible = ref(false)
 const morePosition = ref(null)
 const currentSelectedUser = ref(null)
@@ -206,6 +208,18 @@ const onDelUser = () => {
       showToast(res.msg, true)
     }
   })
+}
+
+const handlerAddUser = () => {
+  addUserIsOpen.value = true
+  addUserInfo.value = {account: '', name: '', sex: '', birthday: '', email: '', phone: ''}
+  currentSelectedUser.value = null
+}
+
+const handlerEditUser = () => {
+  addUserIsOpen.value = true
+  moreIsVisible.value = false
+  addUserInfo.value = currentSelectedUser.value
 }
 
 const onDisableUser = () => {
@@ -240,20 +254,31 @@ watch([pagination, searchValue, selectedOption], () => {
   onUserPage()
 })
 
-const onCreateUser = () => {
+const onCreateOrUpdateUser = () => {
   if (addUserInfo.value.account &&
-      addUserInfo.value.username &&
+      addUserInfo.value.name &&
       addUserInfo.value.email) {
-    UserAPi.create(addUserInfo.value).then(res => {
-      if (res.code === 0) {
-        showToast("用户创建成功，密码已发送到该邮箱~")
-        addUserInfo.value = {account: '', username: '', sex: '', birthday: '', email: '', phone: ''}
-        addUserIsOpen.value = false
-        onUserPage()
-      } else {
-        showToast(res.msg, true)
-      }
-    })
+    if (!currentSelectedUser.value) {
+      UserAPi.create(addUserInfo.value).then(res => {
+        if (res.code === 0) {
+          showToast("用户创建成功，密码已发送到该邮箱~")
+          addUserIsOpen.value = false
+          onUserPage()
+        } else {
+          showToast(res.msg, true)
+        }
+      })
+    } else {
+      UserAPi.update(addUserInfo.value).then(res => {
+        if (res.code === 0) {
+          showToast("用户信息更新成功~")
+          addUserIsOpen.value = false
+          onUserPage()
+        } else {
+          showToast(res.msg, true)
+        }
+      })
+    }
   } else {
     showToast("信息填写不完整~", true)
   }
