@@ -10,17 +10,18 @@
           :type="inputType"
           @input="handleInput"
           @blur="onBlur"
+          :readonly="props.readonly"
       />
       <div class="operation" style="display: flex; justify-content: center">
         <div class="operation-icon"></div>
         <i
-            v-if="value && type !== 'date'"
+            v-if="value && type !== 'date' && !props.readonly"
             class="iconfont icon-guanbi operation-icon"
             @click="onCleanValue"
         ></i>
         <div v-else style="width: 20px"></div>
       </div>
-      <div v-if="limit > 0" class="character-count">
+      <div v-if="limit > 0 && !props.readonly" class="character-count">
         {{ value?.length || 0 }}/{{ limit }}
       </div>
       <div>{{ pos }}</div>
@@ -62,6 +63,10 @@ const props = defineProps({
     default: '内容不能为空'
   },
   isOnlyChars: {
+    type: Boolean,
+    default: false
+  },
+  readonly: {
     type: Boolean,
     default: false
   }
