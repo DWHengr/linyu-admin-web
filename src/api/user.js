@@ -15,5 +15,11 @@ export default {
     },
     unDisable(param) {
         return Http.post("/admin/v1/api/user/undisable", param)
+    },
+    update(param) {
+        return Http.post("/admin/v1/api/user/update", param)
+    },
+    resetPassword(param) {
+        return Http.post("/admin/v1/api/user/reset/password", param)
     }
 };

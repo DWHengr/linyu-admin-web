@@ -72,7 +72,7 @@
         <div class="option" @click="handlerEditUser">修改信息</div>
         <div class="option" v-if="currentSelectedUser?.role === 'admin'">取消管理员</div>
         <div class="option" v-if="currentSelectedUser?.role !== 'admin'">设置管理员</div>
-        <div class="option" @click="()=>{}">重置密码</div>
+        <div class="option" @click="onResetPassword">重置密码</div>
         <div class="option" @click="()=>{delUserIsOpen=true;moreIsVisible=false}">删除</div>
       </div>
     </CustomPopover>
@@ -282,6 +282,17 @@ const onCreateOrUpdateUser = () => {
   } else {
     showToast("信息填写不完整~", true)
   }
+}
+
+const onResetPassword = () => {
+  UserAPi.resetPassword({userId: currentSelectedUser.value.id}).then(res => {
+    if (res.code === 0) {
+      showToast("重置密码成功~")
+      moreIsVisible.value = false
+    } else {
+      showToast(res.msg, false)
+    }
+  })
 }
 
 const handlerSetMorePosition = (e, user) => {
