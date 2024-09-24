@@ -70,8 +70,8 @@
         <div class="option" v-if="currentSelectedUser?.status === 'normal'" @click="onDisableUser">禁用</div>
         <div class="option" v-if="currentSelectedUser?.status === 'disable'" @click="onUnDisableUser">解禁</div>
         <div class="option" @click="handlerEditUser">修改信息</div>
-        <div class="option" v-if="currentSelectedUser?.role === 'admin'">取消管理员</div>
-        <div class="option" v-if="currentSelectedUser?.role !== 'admin'">设置管理员</div>
+        <div class="option" v-if="currentSelectedUser?.role === 'admin'" @click="onCancelAdmin">取消管理员</div>
+        <div class="option" v-if="currentSelectedUser?.role !== 'admin'" @click="onSetAdmin">设置管理员</div>
         <div class="option" @click="onResetPassword">重置密码</div>
         <div class="option" @click="()=>{delUserIsOpen=true;moreIsVisible=false}">删除</div>
       </div>
@@ -303,6 +303,31 @@ const handlerSetMorePosition = (e, user) => {
   }
   morePosition.value = {top: rect.top, left: rect.left, bottom: rect.bottom, right: rect.right}
   currentSelectedUser.value = user
+}
+
+
+const onSetAdmin = () => {
+  UserAPi.setAdmin({userId: currentSelectedUser.value.id}).then(res => {
+    if (res.code === 0) {
+      showToast("设置成功~")
+      moreIsVisible.value = false
+      onUserPage()
+    } else {
+      showToast(res.msg, true)
+    }
+  })
+}
+
+const onCancelAdmin = () => {
+  UserAPi.cancelAdmin({userId: currentSelectedUser.value.id}).then(res => {
+    if (res.code === 0) {
+      showToast("取消成功~")
+      moreIsVisible.value = false
+      onUserPage()
+    } else {
+      showToast(res.msg, true)
+    }
+  })
 }
 
 </script>

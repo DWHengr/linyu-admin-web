@@ -21,5 +21,11 @@ export default {
     },
     resetPassword(param) {
         return Http.post("/admin/v1/api/user/reset/password", param)
+    },
+    setAdmin(param) {
+        return Http.post("/admin/v1/api/user/set/admin", param)
+    },
+    cancelAdmin(param) {
+        return Http.post("/admin/v1/api/user/cancel/admin", param)
     }
 };
