@@ -19,7 +19,7 @@
                   class="w-[85px] text-ellipsis overflow-hidden whitespace-nowrap text-[16px] leading-[16px]"
                   :class="item.id === selectedNotify?.id?'text-[#FFF]':'text-[#1F1F1F]'"
               >
-                {{ item.title }}
+                {{ item.content.title }}
               </div>
               <div
                   class="text-[10px] leading-[16px] flex-shrink-0"
@@ -33,7 +33,7 @@
                   class="text-[12px] leading-[12px]"
                   :class="item.id === selectedNotify?.id?'text-[#FFF]':'text-[#1F1F1F]'"
               >
-                {{ item.content }}
+                {{ item.content.text }}
               </div>
             </div>
           </div>
@@ -55,11 +55,11 @@
         </div>
         <div class="flex flex-col overflow-y-scroll pr-[5px]">
           <div class="label">标题</div>
-          <div class="mb-[30px]">{{ selectedNotify.title }}</div>
+          <div class="mb-[30px]">{{ selectedNotify.content.title }}</div>
           <div class="label">图片内容</div>
-          <img class="mb-[30px] rounded-[5px]" :src="selectedNotify.img" style="width: 600px;">
+          <img class="mb-[30px] rounded-[5px]" :src="selectedNotify.content.img" style="width: 600px;">
           <div class="label">内容</div>
-          <div>{{ selectedNotify.content }}</div>
+          <div>{{ selectedNotify.content.text }}</div>
         </div>
       </div>
     </div>
@@ -67,29 +67,30 @@
 </template>
 <script setup>
 import CustomSearchInput from "@/components/CustomSearchInput.vue";
-import {ref, watch} from "vue";
+import {onMounted, ref, watch} from "vue";
 import CustomIconfontButton from "@/components/CustomIconfontButton.vue";
+import NotifyApi from "@/api/notify.js";
 
 let selectedNotify = ref(null)
 
-let systemNotifyData = [
-  {
-    id: "1",
-    title: "欢迎使用~",
-    img: "https://tse4-mm.cn.bing.net/th/id/OIP-C.DOOxGtkUiW8QevWtAxsRtAHaEK?rs=1&pid=ImgDetMain",
-    content: "欢迎使用林语~",
-    createTime: "2023-10-10 20:10:30",
-  }, {
-    id: "2",
-    title: "欢迎使用~2",
-    img: "https://img.zcool.cn/community/01b6355a41b5c1a801206ed327b765.jpg@1280w_1l_2o_100sh.jpg",
-    content: "欢迎使用林语~2",
-    createTime: "2023-10-10 20:10:30",
-  }
-]
+let systemNotifyData = ref([])
+
+onMounted(() => {
+  onGetNotifyList()
+})
+
+const onGetNotifyList = () => {
+  NotifyApi.list().then(res => {
+    if (res.code === 0) {
+      systemNotifyData.value = res.data
+    }
+  })
+}
 
 watch(systemNotifyData, () => {
-  selectedNotify.value = systemNotifyData[0]
+  if (systemNotifyData.value && systemNotifyData.value.length > 0) {
+    selectedNotify.value = systemNotifyData.value[0]
+  }
 }, {immediate: true})
 </script>
 <style lang="less" scoped>
