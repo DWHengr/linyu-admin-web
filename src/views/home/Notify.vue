@@ -3,7 +3,8 @@
     <div class="list">
       <div class="flex justify-between items-center">
         <div class="h-[28px] text-[28px] leading-[28px] flex items-center font-[600]">系统通知</div>
-        <CustomIconfontButton icon="iconfont icon-tianjia" class="primary-icon-button"/>
+        <CustomIconfontButton icon="iconfont icon-tianjia" class="primary-icon-button"
+                              @click="selectedNotify=null;notifyOperation='create'"/>
       </div>
       <CustomSearchInput placeholder="搜索" style="margin-bottom: 15px;margin-top: 15px"/>
       <div class="flex-1 flex flex-col overflow-y-scroll pr-[5px]">
@@ -11,7 +12,7 @@
              class="card"
              :class="item.id === selectedNotify?.id?'selected':''"
              :key="item.id"
-             @click="selectedNotify=item"
+             @click="selectedNotify=item;notifyOperation='show'"
         >
           <div class="flex h-[45px] w-full flex-1 justify-between flex-col py-[2px]">
             <div class="flex w-full justify-between items-center flex-shrink-0">
@@ -41,27 +42,8 @@
       </div>
     </div>
     <div class="content">
-      <div v-if="selectedNotify" class="w-[600px] flex flex-col overflow-hidden">
-        <div class="flex justify-between my-[20px]">
-          <div class="text-[#707070] select-none">创建时间:{{ selectedNotify.createTime }}</div>
-          <div class="flex">
-            <div class="icon-button">
-              <i class="iconfont icon-tijiao"/>
-            </div>
-            <div class="icon-button">
-              <i class="iconfont icon-shanchu"/>
-            </div>
-          </div>
-        </div>
-        <div class="flex flex-col overflow-y-scroll pr-[5px]">
-          <div class="label">标题</div>
-          <div class="mb-[30px]">{{ selectedNotify.content.title }}</div>
-          <div class="label">图片内容</div>
-          <img class="mb-[30px] rounded-[5px]" :src="selectedNotify.content.img" style="width: 600px;">
-          <div class="label">内容</div>
-          <div>{{ selectedNotify.content.text }}</div>
-        </div>
-      </div>
+      <NotifyContentShow v-if="selectedNotify&&notifyOperation==='show'" :notify="selectedNotify"
+                         @del-notify="onGetNotifyList"/>
     </div>
   </div>
 </template>
@@ -70,10 +52,11 @@ import CustomSearchInput from "@/components/CustomSearchInput.vue";
 import {onMounted, ref, watch} from "vue";
 import CustomIconfontButton from "@/components/CustomIconfontButton.vue";
 import NotifyApi from "@/api/notify.js";
+import NotifyContentShow from "@/components/NotifyContentShow.vue";
 
 let selectedNotify = ref(null)
-
 let systemNotifyData = ref([])
+let notifyOperation = ref("show")
 
 onMounted(() => {
   onGetNotifyList()
@@ -168,33 +151,6 @@ watch(systemNotifyData, () => {
     display: flex;
     justify-content: center;
     border-radius: 0 5px 5px 0;
-
-    .icon-button {
-      width: 30px;
-      height: 30px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 5px;
-      cursor: pointer;
-
-      &:hover {
-        background-color: rgba(76, 155, 255, 0.15);
-      }
-    }
-
-    .label {
-      padding: 5px;
-      font-size: 24px;
-      line-height: 24px;
-      margin-bottom: 10px;
-      color: #707070;
-      letter-spacing: 1px;
-      font-weight: 600;
-      background-image: linear-gradient(-130deg, #F9FBFF, #E3ECFF);
-      user-select: none;
-      border-radius: 2px;
-    }
   }
 }
 </style>
