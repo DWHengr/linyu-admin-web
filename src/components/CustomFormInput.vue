@@ -1,34 +1,32 @@
 <template>
-  <div>
-    <div :class="['custom-input', { required: isShowRequiredMsg, invalid: !isValid }]">
-      <div v-if="pre" class="pre">
-        {{ pre }}
-      </div>
-      <input
-          :placeholder="placeholder"
-          :value="value"
-          :type="inputType"
-          @input="handleInput"
-          @blur="onBlur"
-          :readonly="props.readonly"
-      />
-      <div class="operation" style="display: flex; justify-content: center">
-        <div class="operation-icon"></div>
-        <i
-            v-if="value && type !== 'date' && !props.readonly"
-            class="iconfont icon-guanbi operation-icon"
-            @click="onCleanValue"
-        ></i>
-        <div v-else style="width: 20px"></div>
-      </div>
-      <div v-if="limit > 0 && !props.readonly" class="character-count">
-        {{ value?.length || 0 }}/{{ limit }}
-      </div>
-      <div>{{ pos }}</div>
+  <div :class="['custom-input', { required: isShowRequiredMsg, invalid: !isValid }]">
+    <div v-if="pre" class="pre">
+      {{ pre }}
     </div>
-    <div style="height: 18px; font-size: 12px; color: #ff4c4c">
-      {{ errorMessage }}
+    <input
+        :placeholder="placeholder"
+        :value="value"
+        :type="inputType"
+        @input="handleInput"
+        @blur="onBlur"
+        :readonly="props.readonly"
+    />
+    <div class="operation" style="display: flex; justify-content: center">
+      <div class="operation-icon"></div>
+      <i
+          v-if="value && type !== 'date' && !props.readonly"
+          class="iconfont icon-guanbi operation-icon"
+          @click="onCleanValue"
+      ></i>
+      <div v-else style="width: 20px"></div>
     </div>
+    <div v-if="limit > 0 && !props.readonly" class="character-count">
+      {{ value?.length || 0 }}/{{ limit }}
+    </div>
+    <div>{{ pos }}</div>
+  </div>
+  <div style="height: 18px; font-size: 12px; color: #ff4c4c">
+    {{ errorMessage }}
   </div>
 </template>
 
@@ -156,6 +154,10 @@ const handleInput = (e) => {
   border: #d9d9d9 1px solid;
   padding: 0 10px;
   font-size: 14px;
+}
+
+.custom-input:focus-within {
+  border: var(--primary-color) 1px solid;
 }
 
 .custom-input.required,
