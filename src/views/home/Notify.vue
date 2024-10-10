@@ -44,6 +44,7 @@
     <div class="content">
       <NotifyContentShow v-if="selectedNotify&&notifyOperation==='show'" :notify="selectedNotify"
                          @del-notify="onGetNotifyList"/>
+      <NotifyContentCreate v-if="notifyOperation==='create'" @on-create="onGetNotifyList"/>
     </div>
   </div>
 </template>
@@ -53,6 +54,7 @@ import {onMounted, ref, watch} from "vue";
 import CustomIconfontButton from "@/components/CustomIconfontButton.vue";
 import NotifyApi from "@/api/notify.js";
 import NotifyContentShow from "@/components/NotifyContentShow.vue";
+import NotifyContentCreate from "@/components/NotifyContentCreate.vue";
 
 let selectedNotify = ref(null)
 let systemNotifyData = ref([])
