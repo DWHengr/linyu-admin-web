@@ -60,38 +60,51 @@
       </div>
     </div>
     <div class="main-right">
-      <div class="text-[20px] font-[600] mb-[10px] h-[30px] select-none">今日登录详情</div>
-      <div class="login-info">
+      <div class="flex justify-between items-center">
+        <div class="text-[20px] font-[600] mb-[10px] h-[30px] select-none">今日登录详情</div>
+        <CustomSearchInput v-model:value="loginDetailsQueryInfo.keyword" placeholder="搜索"
+                           style="margin-bottom: 15px;margin-top: 0;height: 30px;width: 260px"/>
+      </div>
+      <div class="login-info" ref="loginDetailsContainerRef">
         <div v-for="(item,index) in loginDetailsData"
              class="login-info-card"
              :class="{odd:index%2!==0}"
         >
           <div class="flex items-center">
-            <div class="h-[40px] w-[40px] rounded-[40px] bg-[var(--primary-color)] mr-[10px] shrink-0"></div>
+            <img class="h-[40px] w-[40px] rounded-[40px] bg-[var(--primary-color)] mr-[10px] shrink-0"
+                 :src="item.portrait">
             <div class="flex flex-col">
-              <div class="flex">
+              <div class="flex items-center">
                 <div>{{ item.name }}</div>
                 <div class="text-[12px] ml-[5px] text-[#787878]">{{ item.account }}</div>
               </div>
-              <div class="text-[14px]">{{ item.phone }}</div>
+              <div class="text-[14px]">{{ item.email }}</div>
             </div>
           </div>
           <div class="flex flex-col items-center">
-            <div>{{ item.loginTime }}</div>
-            <div class="text-[#787878] text-[14px]">{{ item.ip }}</div>
+            <div class="text-[#787878] text-[14px]">{{ item.createTime }}</div>
+            <div>{{ item.content }}</div>
           </div>
         </div>
       </div>
-
+      <CustomEmpty v-if="loginDetailsData.length<=0"/>
     </div>
   </div>
 </template>
 
 <script setup>
 import * as echarts from 'echarts'
-import {nextTick, onMounted, onUnmounted, ref} from "vue";
+import {nextTick, onMounted, onUnmounted, ref, watch} from "vue";
+import StatisticApi from "@/api/statistic.js";
+import CustomSearchInput from "@/components/CustomSearchInput.vue";
+import CustomEmpty from "@/components/CustomEmpty.vue";
 
 const onlineChart = ref(null)
+const loginDetailsData = ref([])
+const loginDetailsQueryInfo = ref({index: 0, num: 20, keyword: ''})
+let loginDetailsDataComplete = false
+let loginDetailsDataLoading = false
+const loginDetailsContainerRef = ref(null);
 let onlineChartInstance = null;
 let maxRankNum = 0;
 
@@ -121,94 +134,22 @@ let rankData = [
 
 maxRankNum = rankData[0].num
 
-let loginDetailsData = [
-  {
-    name: "王小二",
-    account: "wangxiaoer",
-    phone: "18833333333",
-    ip: "219.10.10.211",
-    loginTime: "2024-10-12 23:30:10"
-  },
-  {
-    name: "王小二",
-    account: "wangxiaoer",
-    phone: "18833333333",
-    ip: "219.10.10.211",
-    loginTime: "2024-10-12 23:30:10"
-  },
-  {
-    name: "王小二",
-    account: "wangxiaoer",
-    phone: "18833333333",
-    ip: "219.10.10.211",
-    loginTime: "2024-10-12 23:30:10"
-  },
-  {
-    name: "王小二",
-    account: "wangxiaoer",
-    phone: "18833333333",
-    ip: "219.10.10.211",
-    loginTime: "2024-10-12 23:30:10"
-  },
-  {
-    name: "王小二",
-    account: "wangxiaoer",
-    phone: "18833333333",
-    ip: "219.10.10.211",
-    loginTime: "2024-10-12 23:30:10"
-  },
-  {
-    name: "王小二",
-    account: "wangxiaoer",
-    phone: "18833333333",
-    ip: "219.10.10.211",
-    loginTime: "2024-10-12 23:30:10"
-  },
-  {
-    name: "王小二",
-    account: "wangxiaoer",
-    phone: "18833333333",
-    ip: "219.10.10.211",
-    loginTime: "2024-10-12 23:30:10"
-  },
-  {
-    name: "王小二",
-    account: "wangxiaoer",
-    phone: "18833333333",
-    ip: "219.10.10.211",
-    loginTime: "2024-10-12 23:30:10"
-  },
-  {
-    name: "王小二",
-    account: "wangxiaoer",
-    phone: "18833333333",
-    ip: "219.10.10.211",
-    loginTime: "2024-10-12 23:30:10"
-  },
-  {
-    name: "王小二",
-    account: "wangxiaoer",
-    phone: "18833333333",
-    ip: "219.10.10.211",
-    loginTime: "2024-10-12 23:30:10"
-  },
-  {
-    name: "王小二",
-    account: "wangxiaoer",
-    phone: "18833333333",
-    ip: "219.10.10.211",
-    loginTime: "2024-10-12 23:30:10"
-  },
-  {
-    name: "王小二",
-    account: "wangxiaoer",
-    phone: "18833333333",
-    ip: "219.10.10.211",
-    loginTime: "2024-10-12 23:30:10"
+
+const handleScroll = () => {
+  const container = loginDetailsContainerRef.value;
+  if (!container) return;
+  const {scrollTop, scrollHeight, clientHeight} = container;
+  if (Math.abs(scrollHeight - clientHeight - scrollTop) < 1) {
+    if (!loginDetailsDataComplete && !loginDetailsDataLoading) {
+      loginDetailsQueryInfo.value.index += loginDetailsQueryInfo.value.num
+      onLoginDetails()
+    }
   }
-]
+};
+
 
 onMounted(async () => {
+  onLoginDetails()
   await nextTick();
   onlineChartInstance = echarts.init(onlineChart.value);
   const option = {
@@ -247,13 +188,36 @@ onMounted(async () => {
     ]
   };
   onlineChartInstance.setOption(option);
+  loginDetailsContainerRef.value.addEventListener('scroll', handleScroll);
 });
 
 onUnmounted(() => {
   if (onlineChartInstance != null && onlineChartInstance.dispose) {
     onlineChartInstance.dispose();
   }
+  loginDetailsContainerRef.value?.removeEventListener('scroll', handleScroll);
 });
+
+const onLoginDetails = () => {
+  loginDetailsDataLoading = true
+  StatisticApi.loginDetails(loginDetailsQueryInfo.value).then(res => {
+    if (res.code === 0) {
+      if (res.data.length > 0) {
+        loginDetailsData.value = [...loginDetailsData.value, ...res.data]
+      } else {
+        loginDetailsDataComplete = true
+      }
+    }
+  }).finally(() => {
+    loginDetailsDataLoading = false
+  })
+}
+watch(() => loginDetailsQueryInfo.value.keyword, () => {
+  loginDetailsQueryInfo.value.index = 0
+  loginDetailsQueryInfo.value.num = 20
+  loginDetailsData.value = []
+  onLoginDetails()
+})
 </script>
 
 <style lang="less">
