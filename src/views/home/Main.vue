@@ -9,14 +9,14 @@
               <div class="ml-[10px]">
                 <img alt="" src="@/assets/icon/click.png" class="h-[40px] w-[40px] select-none">
                 <div class="text-[#787878] text-[12px] select-none">今日登录人数：</div>
-                <div class="font-[600] text-[28px]">1008</div>
+                <div class="font-[600] text-[28px]">{{ numInfo.loginNum }}</div>
               </div>
             </div>
             <div class="info-card">
               <div class="ml-[10px]">
                 <img alt="" src="@/assets/icon/message.png" class="h-[40px] w-[40px] select-none">
                 <div class="text-[#787878] text-[12px] select-none">今日消息数：</div>
-                <div class="font-[600] text-[28px]">2040008</div>
+                <div class="font-[600] text-[28px]">{{ numInfo.msgNum }}</div>
               </div>
             </div>
           </div>
@@ -26,7 +26,7 @@
           <div class="text-[12px] text-[#787878] select-none">当前,在线人数:</div>
           <div class="flex items-center">
             <div class="h-[12px] w-[12px] bg-[var(--primary-color)] rounded-[20px] mr-[5px]"></div>
-            <div>800</div>
+            <div>{{ numInfo.onlineNum }}</div>
           </div>
         </div>
       </div>
@@ -98,6 +98,8 @@ import {nextTick, onMounted, onUnmounted, ref, watch} from "vue";
 import StatisticApi from "@/api/statistic.js";
 import CustomSearchInput from "@/components/CustomSearchInput.vue";
 import CustomEmpty from "@/components/CustomEmpty.vue";
+import NotifyApi from "@/api/notify.js";
+import {getDateParts, getMonthAndDayParts} from "@/utils/data.js";
 
 const onlineChart = ref(null)
 const loginDetailsData = ref([])
@@ -105,6 +107,7 @@ const loginDetailsQueryInfo = ref({index: 0, num: 20, keyword: ''})
 let loginDetailsDataComplete = false
 let loginDetailsDataLoading = false
 const loginDetailsContainerRef = ref(null);
+const numInfo = ref({loginNum: 0, onlineNum: 0, msgNum: 0, statistics: []})
 let onlineChartInstance = null;
 let maxRankNum = 0;
 
@@ -147,10 +150,7 @@ const handleScroll = () => {
   }
 };
 
-
-onMounted(async () => {
-  onLoginDetails()
-  await nextTick();
+const handlerShowStatistics = () => {
   onlineChartInstance = echarts.init(onlineChart.value);
   const option = {
     legend: {
@@ -167,7 +167,7 @@ onMounted(async () => {
       bottom: '10%'
     },
     xAxis: {
-      data: ["11-01", "11-02", "11-03", "11-04", "11-05", "11-06", "11-07"]
+      data: numInfo.value?.statistics?.map(item => getMonthAndDayParts(item.date))
     },
     yAxis: {},
     series: [{
@@ -176,18 +176,24 @@ onMounted(async () => {
       },
       name: '登录数量',
       type: 'bar',
-      data: [120, 200, 150, 80, 70, 100, 80]
+      data: numInfo.value?.statistics?.map(item => item.loginNum)
     }, {
       itemStyle: {
         color: '#A0D9F6'
       },
       name: '同时在线人数',
       type: 'bar',
-      data: [100, 180, 120, 10, 80, 40, 30]
+      data: numInfo.value?.statistics?.map(item => item.onlineNum)
     }
     ]
   };
   onlineChartInstance.setOption(option);
+}
+
+onMounted(async () => {
+  onLoginDetails()
+  await nextTick()
+  await onGetNumInfo()
   loginDetailsContainerRef.value.addEventListener('scroll', handleScroll);
 });
 
@@ -212,6 +218,16 @@ const onLoginDetails = () => {
     loginDetailsDataLoading = false
   })
 }
+
+const onGetNumInfo = () => {
+  StatisticApi.numInfo().then(res => {
+    if (res.code === 0) {
+      numInfo.value = res.data
+      handlerShowStatistics()
+    }
+  })
+}
+
 watch(() => loginDetailsQueryInfo.value.keyword, () => {
   loginDetailsQueryInfo.value.index = 0
   loginDetailsQueryInfo.value.num = 20
