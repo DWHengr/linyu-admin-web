@@ -1,16 +1,7 @@
 <template>
-  <div
-      :style="{
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexDirection: 'column',
-    }"
-  >
+  <div class="flex flex-col w-full h-full items-center justify-center">
     <img data-tauri-drag-region :style="{ width: '130px', height: '80px' }" src="/empty.svg" alt="empty"/>
-    <div data-tauri-drag-region :style="{ fontSize: '14px', marginBottom: '200px' }">
+    <div data-tauri-drag-region :style="{ fontSize: '14px' }">
       {{ placeholder }}
     </div>
   </div>
