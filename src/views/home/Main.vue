@@ -37,13 +37,13 @@
         <div class="text-[20px] font-[600] mb-[5px] select-none">今日发送消息数 TOP10 榜单</div>
         <div class="w-full flex-1 divide-y overflow-y-scroll pr-[5px]">
           <div v-for="(item,index) in rankData" class="flex w-full h-[60px] items-center">
-            <div class="h-[40px] w-[40px] relative mr-[15px]">
+            <div class="h-[40px] w-[40px] relative mr-[15px] shrink-0">
               <img
                   v-if="index===0"
                   src="@/assets/icon/crown.png" alt=""
                   class="h-[40px] w-[40px] absolute top-[-45%] right-[-45%] rotate-45"
               >
-              <div class="h-[40px] w-[40px] rounded-[40px] bg-[var(--primary-color)] shrink-0"></div>
+              <img class="h-[40px] w-[40px] rounded-[40px]" :src="item.portrait"/>
             </div>
             <div class="w-full flex flex-col justify-between h-[40px]">
               <div class="flex w-full justify-between">
@@ -56,6 +56,7 @@
               />
             </div>
           </div>
+          <CustomEmpty v-if="rankData.length<=0" placeholder="暂无排名信息~"/>
         </div>
       </div>
     </div>
@@ -109,34 +110,8 @@ let loginDetailsDataLoading = false
 const loginDetailsContainerRef = ref(null);
 const numInfo = ref({loginNum: 0, onlineNum: 0, msgNum: 0, statistics: []})
 let onlineChartInstance = null;
-let maxRankNum = 0;
-
-let rankData = [
-  {
-    name: "王小二",
-    num: 200
-  },
-  {
-    name: "王小二",
-    num: 180
-  },
-  {
-    name: "王小二",
-    num: 120
-  },
-  {
-    name: "王小二",
-    num: 80
-  }
-  ,
-  {
-    name: "王小二",
-    num: 60
-  }
-]
-
-maxRankNum = rankData[0].num
-
+let rankData = ref([])
+let maxRankNum = ref(0);
 
 const handleScroll = () => {
   const container = loginDetailsContainerRef.value;
@@ -192,8 +167,9 @@ const handlerShowStatistics = () => {
 
 onMounted(async () => {
   onLoginDetails()
+  onGetNumInfo()
+  onTop10Msg()
   await nextTick()
-  await onGetNumInfo()
   loginDetailsContainerRef.value.addEventListener('scroll', handleScroll);
 });
 
@@ -224,6 +200,17 @@ const onGetNumInfo = () => {
     if (res.code === 0) {
       numInfo.value = res.data
       handlerShowStatistics()
+    }
+  })
+}
+
+const onTop10Msg = () => {
+  StatisticApi.top10Msg().then(res => {
+    if (res.code === 0) {
+      if (res.data?.length > 0) {
+        rankData.value = res.data
+        maxRankNum.value = res.data[0].num
+      }
     }
   })
 }

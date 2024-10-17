@@ -6,5 +6,8 @@ export default {
     },
     numInfo() {
         return Http.get("/admin/v1/api/stat/num/info");
+    },
+    top10Msg() {
+        return Http.get("/admin/v1/api/stat/top10/msg");
     }
 };
