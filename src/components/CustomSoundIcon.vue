@@ -1,0 +1,73 @@
+<template>
+  <div :class="['sound-icon', isStart ? 'start' : '']" :style="style">
+    <div class="bar bar1" :style="barStyle"></div>
+    <div class="bar bar2" :style="barStyle"></div>
+    <div class="bar bar3" :style="barStyle"></div>
+    <div class="bar bar4" :style="barStyle"></div>
+    <div class="bar bar5" :style="barStyle"></div>
+  </div>
+</template>
+
+<script setup>
+const props = defineProps({
+  isStart: Boolean,
+  style: Object,
+  barStyle: Object,
+});
+</script>
+
+<style scoped>
+.sound-icon {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 30px;
+  height: 18px;
+}
+
+.bar {
+  width: 2px;
+  background-color: #fff;
+}
+
+.bar1 {
+  height: 5px;
+}
+
+.bar2 {
+  height: 10px;
+}
+
+.bar3 {
+  height: 15px;
+}
+
+.bar4 {
+  height: 10px;
+}
+
+.bar5 {
+  height: 5px;
+}
+
+.start .bar1, .start .bar5 {
+  animation: bar-animation 0.6s infinite;
+}
+
+.start .bar2, .start .bar4 {
+  animation: bar-animation 0.6s infinite 0.25s;
+}
+
+.start .bar3 {
+  animation: bar-animation 0.6s infinite 0.5s;
+}
+
+@keyframes bar-animation {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.5);
+  }
+}
+</style>
