@@ -68,6 +68,7 @@ let onLogin = async () => {
           sessionStorage.setItem('x-token', res.data.token)
           sessionStorage.setItem('portrait', res.data.portrait)
           sessionStorage.setItem('username', res.data.username)
+          sessionStorage.setItem('userId', res.data.userId)
           router.push("/home")
         } else {
           showToast(res.msg, true)
