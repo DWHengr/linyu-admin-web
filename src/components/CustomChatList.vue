@@ -14,42 +14,42 @@
       <div class="flex-1 flex flex-col overflow-y-scroll pr-[5px]">
         <div v-for="item in userChatListData"
              class="chat-card"
-             :class="item.id === selectedUserId?'selected':''"
+             :class="item.id === selectedUser?.id?'selected':''"
              :key="item.id"
-             @click="selectedUserId=item.id"
+             @click="selectedUser=item"
         >
           <img
               alt=""
-              src="https://gd-hbimg.huaban.com/67d634c2af824efcc8574a59342c1042021311e316edc-SPs6FN_fw236"
+              :src="item.portrait"
               class="w-[40px] h-[40px] rounded-[40px] mr-[10px]"
           >
           <div class="flex h-[45px] w-full flex-1 justify-between flex-col py-[2px]">
             <div class="flex w-full justify-between items-center flex-shrink-0">
               <div
-                  class="w-[85px] text-ellipsis overflow-hidden whitespace-nowrap text-[16px] leading-[16px]"
-                  :class="item.id === selectedUserId?'text-[#FFF]':'text-[#1F1F1F]'"
+                  class="w-[85px] text-ellipsis overflow-hidden whitespace-nowrap text-[14px] leading-[14px]"
+                  :class="item.id === selectedUser?.id?'text-[#FFF]':'text-[#1F1F1F]'"
               >
                 {{ item.name }}
               </div>
               <div
                   class="text-[10px] leading-[16px] flex-shrink-0"
-                  :class="item.id === selectedUserId?'text-[#FFF]':'text-[#1F1F1F]'"
+                  :class="item.id === selectedUser?.id?'text-[#FFF]':'text-[#1F1F1F]'"
               >
-                {{ item.time }}
+                {{ formatTime(item.updateTime) }}
               </div>
             </div>
             <div class="flex h-[16px] w-full justify-between items-center flex-shrink-0">
               <div
                   class="text-[12px] leading-[12px]"
-                  :class="item.id === selectedUserId?'text-[#FFF]':'text-[#1F1F1F]'"
+                  :class="item.id === selectedUser?.id?'text-[#FFF]':'text-[#1F1F1F]'"
               >
-                {{ item.content }}
+                <MsgContentShow :msg-content="item.lastMsgContent"/>
               </div>
               <div
-                  v-if="item.id !== selectedUserId"
+                  v-if="item.id !== selectedUser?.id&&item.unreadNum>0"
                   class="text-[10px] leading-[12px] w-[20px] h-[20px] rounded-[20px] flex justify-center items-center bg-[var(--primary-color)] text-[#FFF]"
               >
-                {{ item.unRead }}
+                {{ item.unreadNum }}
               </div>
             </div>
           </div>
@@ -57,127 +57,39 @@
       </div>
     </div>
     <div class="flex-1">
-      <CustomChatFrame/>
+      <CustomChatFrame v-if="selectedUser" :user-info="selectedUser"/>
+      <CustomEmptyBg v-if="!selectedUser"/>
     </div>
   </div>
 </template>
 <script setup>
 
 import CustomSearchInput from "@/components/CustomSearchInput.vue";
-import {ref, defineEmits} from "vue";
+import {ref, defineEmits, onMounted} from "vue";
 import CustomChatFrame from "@/components/CustomChatFrame/CustomChatFrame.vue";
 import CustomIconfontButton from "@/components/CustomIconfontButton.vue";
+import ChatListApi from "@/api/chatList.js";
+import MsgContentShow from "@/components/MsgContentShow.vue";
+import {formatTime} from "@/utils/data.js";
+import CustomEmptyBg from "@/components/CustomEmptyBg.vue";
 
 defineEmits(["close"])
 
-const selectedUserId = ref("1")
+const selectedUser = ref(null)
+const userChatListData = ref([])
 
-let userChatListData = [
-  {
-    id: "1",
-    name: "王小二",
-    portrait: "https://gd-hbimg.huaban.com/67d634c2af824efcc8574a59342c1042021311e316edc-SPs6FN_fw236",
-    content: "[图片]",
-    time: "2022-10-12 12:60:43",
-    unRead: 99,
-  },
-  {
-    id: "2",
-    name: "王小二",
-    portrait: "https://gd-hbimg.huaban.com/67d634c2af824efcc8574a59342c1042021311e316edc-SPs6FN_fw236",
-    content: "[图片]",
-    time: "2022-10-12 12:60:43",
-    unRead: 99,
-  },
-  {
-    id: "3",
-    name: "王小二",
-    portrait: "https://gd-hbimg.huaban.com/67d634c2af824efcc8574a59342c1042021311e316edc-SPs6FN_fw236",
-    content: "[图片]",
-    time: "2022-10-12 12:60:43",
-    unRead: 99,
-  },
-  {
-    id: "4",
-    name: "王小二",
-    portrait: "https://gd-hbimg.huaban.com/67d634c2af824efcc8574a59342c1042021311e316edc-SPs6FN_fw236",
-    content: "[图片]",
-    time: "2022-10-12 12:60:43",
-    unRead: 99,
-  },
-  {
-    id: "5",
-    name: "王小二",
-    portrait: "https://gd-hbimg.huaban.com/67d634c2af824efcc8574a59342c1042021311e316edc-SPs6FN_fw236",
-    content: "[图片]",
-    time: "2022-10-12 12:60:43",
-    unRead: 99,
-  },
-  {
-    id: "6",
-    name: "王小二",
-    portrait: "https://gd-hbimg.huaban.com/67d634c2af824efcc8574a59342c1042021311e316edc-SPs6FN_fw236",
-    content: "[图片]",
-    time: "2022-10-12 12:60:43",
-    unRead: 99,
-  },
-  {
-    id: "7",
-    name: "王小二",
-    portrait: "https://gd-hbimg.huaban.com/67d634c2af824efcc8574a59342c1042021311e316edc-SPs6FN_fw236",
-    content: "[图片]",
-    time: "2022-10-12 12:60:43",
-    unRead: 99,
-  },
-  {
-    id: "8",
-    name: "王小二",
-    portrait: "https://gd-hbimg.huaban.com/67d634c2af824efcc8574a59342c1042021311e316edc-SPs6FN_fw236",
-    content: "[图片]",
-    time: "2022-10-12 12:60:43",
-    unRead: 99,
-  },
-  {
-    id: "8",
-    name: "王小二",
-    portrait: "https://gd-hbimg.huaban.com/67d634c2af824efcc8574a59342c1042021311e316edc-SPs6FN_fw236",
-    content: "[图片]",
-    time: "2022-10-12 12:60:43",
-    unRead: 99,
-  },
-  {
-    id: "8",
-    name: "王小二",
-    portrait: "https://gd-hbimg.huaban.com/67d634c2af824efcc8574a59342c1042021311e316edc-SPs6FN_fw236",
-    content: "[图片]",
-    time: "2022-10-12 12:60:43",
-    unRead: 99,
-  },
-  {
-    id: "8",
-    name: "王小二",
-    portrait: "https://gd-hbimg.huaban.com/67d634c2af824efcc8574a59342c1042021311e316edc-SPs6FN_fw236",
-    content: "[图片]",
-    time: "2022-10-12 12:60:43",
-    unRead: 99,
-  },
-  {
-    id: "8",
-    name: "王小二",
-    portrait: "https://gd-hbimg.huaban.com/67d634c2af824efcc8574a59342c1042021311e316edc-SPs6FN_fw236",
-    content: "[图片]",
-    time: "2022-10-12 12:60:43",
-    unRead: 99,
-  },
-  {
-    id: "8",
-    name: "王小二",
-    portrait: "https://gd-hbimg.huaban.com/67d634c2af824efcc8574a59342c1042021311e316edc-SPs6FN_fw236",
-    content: "[图片]",
-    time: "2022-10-12 12:60:43",
-    unRead: 99,
-  }
-]
+onMounted(() => {
+  onChatList()
+})
+
+const onChatList = () => {
+  ChatListApi.chatList().then(res => {
+    if (res.code === 0) {
+      userChatListData.value = [...res.data?.tops, ...res.data.others]
+    }
+  })
+}
+
 </script>
 <style lang="less" scoped>
 .custom-chat-list {
@@ -208,6 +120,7 @@ let userChatListData = [
     flex-direction: column;
     overflow: hidden;
     border-right: 1px solid #E1E0E0;
+    flex-shrink: 0;
 
     .chat-card {
       width: 100%;
