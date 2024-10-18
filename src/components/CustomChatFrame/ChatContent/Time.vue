@@ -1,0 +1,33 @@
+<template>
+  <div class="chat-content-time">
+    <div class="content">
+      {{ value }}
+    </div>
+  </div>
+</template>
+
+<script setup>
+defineProps({
+  value: String
+});
+</script>
+
+<style scoped>
+.chat-content-time {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  margin-bottom: 10px;
+  height: 20px;
+  min-height: 20px;
+}
+
+.content {
+  border-radius: 2px;
+  padding: 5px;
+  background-color: rgba(255, 255, 255, 0.8);
+  font-size: 10px;
+  line-height: 10px;
+}
+</style>

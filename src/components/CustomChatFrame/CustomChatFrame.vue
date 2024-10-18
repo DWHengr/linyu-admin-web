@@ -4,13 +4,16 @@
       <div class="flex items-center">
         <img
             alt=""
-            src="https://gd-hbimg.huaban.com/67d634c2af824efcc8574a59342c1042021311e316edc-SPs6FN_fw236"
+            :src="props.userInfo.portrait"
             class="w-[45px] h-[45px] rounded-[45px] mr-[10px]"
         >
-        <div class="font-[600]">王小二</div>
+        <div class="font-[600]">{{ props.userInfo.name }}</div>
       </div>
     </div>
-    <div class="frame-show-msg">
+    <div class="frame-show-msg" ref="messagesRef">
+      <div v-for="(item) in messages" :key="item.id">
+        <MsgContent :user-id="currentUserId" :msg="item"/>
+      </div>
     </div>
     <div class="frame-content">
       <div class="flex">
@@ -32,11 +35,92 @@
     </div>
   </div>
 </template>
-<script setup>
 
+<script setup>
 import CustomIconfontButton from "@/components/CustomIconfontButton.vue";
 import CustomButton from "@/components/CustomButton.vue";
+import {defineProps, nextTick, onMounted, ref, watch} from "vue";
+import MessageApi from "@/api/message.js";
+import MsgContent from "@/components/CustomChatFrame/ChatContent/MsgContent.vue";
+
+let currentMsgRecordIndex = 0;
+const messages = ref([]);
+const messagesRef = ref(null);
+const isLoading = ref(false);
+const isComplete = ref(false);
+const currentUserId = ref(sessionStorage.getItem('userId'));
+
+const props = defineProps({
+  userInfo: Object,
+});
+
+watch(() => props.userInfo, () => {
+  currentMsgRecordIndex = 0;
+  messages.value = [];
+  nextTick(() => onMessageRecord());
+}, {immediate: true});
+
+const scrollToBottom = () => {
+  if (messagesRef.value) {
+    messagesRef.value.scrollTop = messagesRef.value.scrollHeight;
+  }
+};
+
+const onMessageRecord = () => {
+  if (isLoading.value || isComplete.value) return;
+  isLoading.value = true;
+
+  const container = messagesRef.value;
+  const scrollTopBeforeLoad = container ? container.scrollTop : 0;
+  const scrollHeightBeforeLoad = container ? container.scrollHeight : 0;
+
+
+  MessageApi.record({
+    targetId: props.userInfo.fromId,
+    index: currentMsgRecordIndex,
+    num: 20
+  }).then(res => {
+    if (res.code === 0) {
+      const newMessages = res.data;
+      if (newMessages.length > 0) {
+        messages.value = [...newMessages, ...messages.value];
+        currentMsgRecordIndex += newMessages.length;
+        nextTick(() => {
+          if (currentMsgRecordIndex === newMessages.length) {
+            scrollToBottom();
+          } else {
+            requestAnimationFrame(() => {
+              if (container) {
+                const scrollHeightAfterLoad = container.scrollHeight;
+                container.scrollTop = scrollTopBeforeLoad + (scrollHeightAfterLoad - scrollHeightBeforeLoad);
+              }
+            });
+          }
+        });
+      } else {
+        isComplete.value = true
+      }
+    }
+  }).finally(() => {
+    isLoading.value = false;
+  });
+};
+
+const handleScroll = () => {
+  if (messagesRef.value) {
+    if (messagesRef.value.scrollTop === 0 && !isLoading.value) {
+      onMessageRecord();
+    }
+  }
+};
+
+onMounted(() => {
+  if (messagesRef.value) {
+    messagesRef.value.addEventListener('scroll', handleScroll);
+  }
+});
 </script>
+
 <style lang="less" scoped>
 .custom-chat-frame {
   width: 100%;
@@ -46,7 +130,8 @@ import CustomButton from "@/components/CustomButton.vue";
 
   .frame-top {
     width: 100%;
-    height: 60px;
+    min-height: 60px;
+    flex-shrink: 0;
     padding: 0 10px;
     background-color: #F9FBFF;
     display: flex;
@@ -55,12 +140,15 @@ import CustomButton from "@/components/CustomButton.vue";
 
   .frame-show-msg {
     flex: 1;
+    overflow-y: scroll;
+    padding: 0 10px;
   }
 
   .frame-content {
     width: 100%;
     background-color: #F9FBFF;
-    height: 220px;
+    min-height: 220px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
 
@@ -72,6 +160,11 @@ import CustomButton from "@/components/CustomButton.vue";
         background-color: #EDF2F9;
       }
     }
+  }
+
+  .loading {
+    text-align: center;
+    padding: 10px;
   }
 }
 </style>
