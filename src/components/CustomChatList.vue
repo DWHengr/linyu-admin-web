@@ -57,7 +57,7 @@
       </div>
     </div>
     <div class="flex-1">
-      <CustomChatFrame v-if="selectedUser" :user-info="selectedUser"/>
+      <CustomChatFrame v-if="selectedUser" :user-info="selectedUser" @on-send-msg="onChatList"/>
       <CustomEmptyBg v-if="!selectedUser"/>
     </div>
   </div>
@@ -65,13 +65,14 @@
 <script setup>
 
 import CustomSearchInput from "@/components/CustomSearchInput.vue";
-import {ref, defineEmits, onMounted} from "vue";
+import {ref, defineEmits, onMounted, nextTick, watch} from "vue";
 import CustomChatFrame from "@/components/CustomChatFrame/CustomChatFrame.vue";
 import CustomIconfontButton from "@/components/CustomIconfontButton.vue";
 import ChatListApi from "@/api/chatList.js";
 import MsgContentShow from "@/components/MsgContentShow.vue";
 import {formatTime} from "@/utils/data.js";
 import CustomEmptyBg from "@/components/CustomEmptyBg.vue";
+import EventBus from "@/utils/eventBus.js";
 
 defineEmits(["close"])
 
@@ -80,6 +81,7 @@ const userChatListData = ref([])
 
 onMounted(() => {
   onChatList()
+  handlerReceiveMsg()
 })
 
 const onChatList = () => {
@@ -89,6 +91,28 @@ const onChatList = () => {
     }
   })
 }
+
+const handlerReceiveMsg = () => {
+  EventBus.on('on-receive-msg', async (data) => {
+    if (selectedUser.value.fromId === data.fromId || (data.source === 'group' && selectedUser.value.fromId === data.toId)) {
+      onRead()
+    } else {
+      onChatList()
+    }
+  });
+}
+
+const onRead = () => {
+  ChatListApi.read(selectedUser.value.fromId).then(res => {
+    if (res.code === 0) {
+      onChatList()
+    }
+  })
+}
+
+watch(selectedUser, () => {
+  onRead()
+})
 
 </script>
 <style lang="less" scoped>

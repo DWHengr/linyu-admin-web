@@ -1,5 +1,5 @@
 <template>
-  <div class="login-container">
+  <div class="login-container" @keydown.enter="onLogin">
     <img alt="" src="/poster.png" class="poster-img">
     <img class="logo" alt="" src="/title.png">
     <div class="login-content">
@@ -38,6 +38,7 @@ import {useToast} from '@/components/ToastProvider.vue';
 import {ref} from "vue";
 import LoginApi from "@/api/login.js";
 import {JSEncrypt} from "jsencrypt";
+import Ws from "@/utils/ws.js";
 
 const router = useRouter()
 const showToast = useToast()
@@ -70,6 +71,7 @@ let onLogin = async () => {
           sessionStorage.setItem('username', res.data.username)
           sessionStorage.setItem('userId', res.data.userId)
           router.push("/home")
+          Ws.connect(res.data.token)
         } else {
           showToast(res.msg, true)
         }

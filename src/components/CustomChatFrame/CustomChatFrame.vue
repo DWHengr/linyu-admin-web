@@ -28,9 +28,11 @@
             class="operate-icon"
         />
       </div>
-      <div class="flex-1"></div>
+      <div class="flex-1">
+        <CustomTextarea v-model:value="msgContent" placeholder="请输入聊天内容~"/>
+      </div>
       <div class="w-full p-[10px]">
-        <CustomButton class="ml-auto">发送</CustomButton>
+        <CustomButton class="ml-auto" @click="onSendMessage">发送</CustomButton>
       </div>
     </div>
   </div>
@@ -39,9 +41,11 @@
 <script setup>
 import CustomIconfontButton from "@/components/CustomIconfontButton.vue";
 import CustomButton from "@/components/CustomButton.vue";
-import {defineProps, nextTick, onMounted, ref, watch} from "vue";
+import {defineProps, nextTick, onMounted, ref, watch, defineEmits, reactive} from "vue";
 import MessageApi from "@/api/message.js";
 import MsgContent from "@/components/CustomChatFrame/ChatContent/MsgContent.vue";
+import CustomTextarea from "@/components/CustomTextarea.vue";
+import EventBus from "@/utils/eventBus.js";
 
 let currentMsgRecordIndex = 0;
 const messages = ref([]);
@@ -49,10 +53,23 @@ const messagesRef = ref(null);
 const isLoading = ref(false);
 const isComplete = ref(false);
 const currentUserId = ref(sessionStorage.getItem('userId'));
+const msgContent = ref('')
 
 const props = defineProps({
   userInfo: Object,
 });
+
+const emit = defineEmits(['onSendMsg'])
+
+const handlerReceiveMsg = () => {
+  EventBus.on('on-receive-msg', async (data) => {
+    const currentFromUserId = props.userInfo.fromId;
+    if (currentFromUserId === data.fromId || (data.source === 'group' && currentFromUserId === data.toId)) {
+      messages.value = [...messages.value, data]
+      await nextTick(() => scrollToBottom())
+    }
+  });
+}
 
 watch(() => props.userInfo, () => {
   currentMsgRecordIndex = 0;
@@ -106,6 +123,29 @@ const onMessageRecord = () => {
   });
 };
 
+
+const onSendMessage = () => {
+  if (!msgContent.value) return
+  let msg = {
+    toUserId: props.userInfo.fromId,
+    source: 'user',
+    msgContent: {
+      type: "text",
+      content: msgContent.value
+    }
+  }
+  MessageApi.sendMsg(msg).then(res => {
+    if (res.code === 0) {
+      if (res.data) {
+        messages.value = [...messages.value, res.data];
+        nextTick(() => scrollToBottom())
+        msgContent.value = ''
+        emit("onSendMsg")
+      }
+    }
+  })
+}
+
 const handleScroll = () => {
   if (messagesRef.value) {
     if (messagesRef.value.scrollTop === 0 && !isLoading.value) {
@@ -115,6 +155,7 @@ const handleScroll = () => {
 };
 
 onMounted(() => {
+  handlerReceiveMsg()
   if (messagesRef.value) {
     messagesRef.value.addEventListener('scroll', handleScroll);
   }
