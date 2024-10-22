@@ -66,7 +66,7 @@
     </div>
     <CustomPopover placement="bottom" v-model:is-visible="moreIsVisible" :position="morePosition">
       <div class="user-options">
-        <div class="option" @click="()=>{showChat(currentSelectedUser.id);moreIsVisible=false}">发送消息</div>
+        <div class="option" @click="handlerSendMsg">发送消息</div>
         <div class="option" v-if="currentSelectedUser?.status === 'normal'" @click="onDisableUser">禁用</div>
         <div class="option" v-if="currentSelectedUser?.status === 'disable'" @click="onUnDisableUser">解禁</div>
         <div class="option" @click="handlerEditUser">修改信息</div>
@@ -172,6 +172,7 @@ import CustomButton from "@/components/CustomButton.vue";
 import {useToast} from '@/components/ToastProvider.vue';
 import CustomPopover from "@/components/CustomPopover.vue";
 import CustomDialog from "@/components/CustomDialog.vue";
+import ChatList from "@/api/chatList.js";
 
 const searchValue = ref("")
 const selectedOption = ref('none');
@@ -206,6 +207,15 @@ const onDelUser = () => {
       delUserIsOpen.value = false
     } else {
       showToast(res.msg, true)
+    }
+  })
+}
+
+const handlerSendMsg = () => {
+  ChatList.create({userId: currentSelectedUser.value?.id, type: 'user'}).then(res => {
+    if (res.code === 0) {
+      showChat(currentSelectedUser.value?.id)
+      moreIsVisible.value = false
     }
   })
 }

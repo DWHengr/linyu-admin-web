@@ -58,6 +58,9 @@ const defaultStyle = {
   letter-spacing: 0.5px;
   max-width: 300px;
   vertical-align: top;
+  justify-content: center;
+  align-items: center;
+  display: flex;
 }
 
 .content.right {

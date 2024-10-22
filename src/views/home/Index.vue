@@ -11,9 +11,11 @@
             <img alt="" src="@/assets/icon/notify.png" style="width: 26px;height: 26px">
           </div>
           <div
-              class="w-[32px] h-[32px] flex justify-center items-center cursor-pointer hover:bg-[#EDF2F9] rounded-[5px]"
+              class="w-[32px] h-[32px] flex justify-center items-center cursor-pointer hover:bg-[#EDF2F9] rounded-[5px] relative"
               @click="showChat()"
           >
+            <div v-if="unreadInfo.chat>0"
+                 class="w-[10px] h-[10px] rounded-[10px] bg-[#ff4c4c] absolute right-0 top-0"/>
             <img alt="" src="@/assets/icon/chat.png" style="width: 26px;height: 26px">
           </div>
         </div>
@@ -60,11 +62,14 @@ import router from "@/router/index.js";
 import {useRoute} from "vue-router";
 import Chat from "@/use/UseChat/Chat.vue";
 import {useChat} from "@/use/UseChat/useChat.js";
-import {onMounted, reactive} from "vue";
+import {nextTick, onMounted, onUnmounted, reactive, ref} from "vue";
+import UserApi from "@/api/user.js";
+import EventBus from "@/utils/eventBus.js";
 
 const route = useRoute();
 const {showChat} = useChat();
 const currentUserInfo = reactive({username: "", portrait: ""})
+const unreadInfo = ref({chat: 0})
 
 let navigationData = [
   {
@@ -125,11 +130,32 @@ const handlerLogout = () => {
 onMounted(() => {
   currentUserInfo.username = sessionStorage.getItem("username")
   currentUserInfo.portrait = sessionStorage.getItem("portrait")
+  onUnread()
+  handlerReceiveMsg()
+  EventBus.on('on-receive-msg', handlerReceiveMsg)
+  EventBus.on('on-refresh-unread', handlerReceiveMsg)
+})
+
+onUnmounted(() => {
+  EventBus.off('on-receive-msg', handlerReceiveMsg)
+  EventBus.off('on-refresh-unread', handlerReceiveMsg)
 })
 
 let handlerOptionClick = (item) => {
   router.push('/home' + item.route)
 };
+
+const handlerReceiveMsg = () => {
+  onUnread()
+}
+
+const onUnread = () => {
+  UserApi.unread().then(res => {
+    if (res.code === 0) {
+      unreadInfo.value = res.data
+    }
+  })
+}
 </script>
 
 <style lang="less" scoped>

@@ -4,15 +4,15 @@
       <div class="flex items-center">
         <img
             alt=""
-            :src="props.userInfo.portrait"
+            :src="props.chatInfo.portrait"
             class="w-[45px] h-[45px] rounded-[45px] mr-[10px]"
         >
-        <div class="font-[600]">{{ props.userInfo.name }}</div>
+        <div class="font-[600]">{{ props.chatInfo.name }}</div>
       </div>
     </div>
     <div class="frame-show-msg" ref="messagesRef">
       <div v-for="(item) in messages" :key="item.id">
-        <MsgContent :user-id="currentUserId" :msg="item"/>
+        <MsgContent :user-id="currentUserId" :msg="item" :chat-info="props.chatInfo"/>
       </div>
     </div>
     <div class="frame-content">
@@ -41,7 +41,7 @@
 <script setup>
 import CustomIconfontButton from "@/components/CustomIconfontButton.vue";
 import CustomButton from "@/components/CustomButton.vue";
-import {defineProps, nextTick, onMounted, ref, watch, defineEmits, reactive} from "vue";
+import {defineProps, nextTick, onMounted, ref, watch, defineEmits, reactive, onUnmounted} from "vue";
 import MessageApi from "@/api/message.js";
 import MsgContent from "@/components/CustomChatFrame/ChatContent/MsgContent.vue";
 import CustomTextarea from "@/components/CustomTextarea.vue";
@@ -56,24 +56,35 @@ const currentUserId = ref(sessionStorage.getItem('userId'));
 const msgContent = ref('')
 
 const props = defineProps({
-  userInfo: Object,
+  chatInfo: Object,
 });
 
 const emit = defineEmits(['onSendMsg'])
 
-const handlerReceiveMsg = () => {
-  EventBus.on('on-receive-msg', async (data) => {
-    const currentFromUserId = props.userInfo.fromId;
-    if (currentFromUserId === data.fromId || (data.source === 'group' && currentFromUserId === data.toId)) {
-      messages.value = [...messages.value, data]
-      await nextTick(() => scrollToBottom())
-    }
-  });
+onMounted(() => {
+  EventBus.on('on-receive-msg', handlerReceiveMsg)
+  if (messagesRef.value) {
+    messagesRef.value.addEventListener('scroll', handleScroll);
+  }
+});
+
+onUnmounted(() => {
+  EventBus.off('on-receive-msg', handlerReceiveMsg)
+})
+
+const handlerReceiveMsg = (data) => {
+  const currentFromUserId = props.chatInfo.fromId;
+  if ((data.source === 'user' && currentFromUserId === data.fromId) ||
+      (data.source === 'group' && currentFromUserId === data.toId)) {
+    messages.value = [...messages.value, data]
+    nextTick(() => scrollToBottom())
+  }
 }
 
-watch(() => props.userInfo, () => {
+watch(() => props.chatInfo, () => {
   currentMsgRecordIndex = 0;
   messages.value = [];
+  isComplete.value = false
   nextTick(() => onMessageRecord());
 }, {immediate: true});
 
@@ -91,9 +102,8 @@ const onMessageRecord = () => {
   const scrollTopBeforeLoad = container ? container.scrollTop : 0;
   const scrollHeightBeforeLoad = container ? container.scrollHeight : 0;
 
-
   MessageApi.record({
-    targetId: props.userInfo.fromId,
+    targetId: props.chatInfo.fromId,
     index: currentMsgRecordIndex,
     num: 20
   }).then(res => {
@@ -127,8 +137,8 @@ const onMessageRecord = () => {
 const onSendMessage = () => {
   if (!msgContent.value) return
   let msg = {
-    toUserId: props.userInfo.fromId,
-    source: 'user',
+    toUserId: props.chatInfo.fromId,
+    source: props.chatInfo?.type,
     msgContent: {
       type: "text",
       content: msgContent.value
@@ -154,12 +164,6 @@ const handleScroll = () => {
   }
 };
 
-onMounted(() => {
-  handlerReceiveMsg()
-  if (messagesRef.value) {
-    messagesRef.value.addEventListener('scroll', handleScroll);
-  }
-});
 </script>
 
 <style lang="less" scoped>
@@ -182,7 +186,7 @@ onMounted(() => {
   .frame-show-msg {
     flex: 1;
     overflow-y: scroll;
-    padding: 0 10px;
+    padding: 10px 10px;
   }
 
   .frame-content {

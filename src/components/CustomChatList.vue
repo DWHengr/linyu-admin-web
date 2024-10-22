@@ -25,11 +25,14 @@
           >
           <div class="flex h-[45px] w-full flex-1 justify-between flex-col py-[2px]">
             <div class="flex w-full justify-between items-center flex-shrink-0">
-              <div
-                  class="w-[85px] text-ellipsis overflow-hidden whitespace-nowrap text-[14px] leading-[14px]"
-                  :class="item.id === selectedUser?.id?'text-[#FFF]':'text-[#1F1F1F]'"
-              >
-                {{ item.name }}
+              <div class="flex items-center">
+                <div
+                    class="max-w-[85px] text-ellipsis overflow-hidden whitespace-nowrap text-[14px] leading-[14px]"
+                    :class="item.id === selectedUser?.id?'text-[#FFF]':'text-[#1F1F1F]'"
+                >
+                  {{ item.name }}
+                </div>
+                <div v-if="item.type==='group'" class="qun">群</div>
               </div>
               <div
                   class="text-[10px] leading-[16px] flex-shrink-0"
@@ -57,7 +60,7 @@
       </div>
     </div>
     <div class="flex-1">
-      <CustomChatFrame v-if="selectedUser" :user-info="selectedUser" @on-send-msg="onChatList"/>
+      <CustomChatFrame v-if="selectedUser" :chat-info="selectedUser" @on-send-msg="onChatList"/>
       <CustomEmptyBg v-if="!selectedUser"/>
     </div>
   </div>
@@ -65,7 +68,7 @@
 <script setup>
 
 import CustomSearchInput from "@/components/CustomSearchInput.vue";
-import {ref, defineEmits, onMounted, nextTick, watch} from "vue";
+import {ref, defineEmits, onMounted, nextTick, watch, onUnmounted} from "vue";
 import CustomChatFrame from "@/components/CustomChatFrame/CustomChatFrame.vue";
 import CustomIconfontButton from "@/components/CustomIconfontButton.vue";
 import ChatListApi from "@/api/chatList.js";
@@ -81,7 +84,11 @@ const userChatListData = ref([])
 
 onMounted(() => {
   onChatList()
-  handlerReceiveMsg()
+  EventBus.on('on-receive-msg', handlerReceiveMsg)
+})
+
+onUnmounted(() => {
+  EventBus.off('on-receive-msg', handlerReceiveMsg)
 })
 
 const onChatList = () => {
@@ -92,20 +99,18 @@ const onChatList = () => {
   })
 }
 
-const handlerReceiveMsg = () => {
-  EventBus.on('on-receive-msg', async (data) => {
-    if (selectedUser.value.fromId === data.fromId || (data.source === 'group' && selectedUser.value.fromId === data.toId)) {
-      onRead()
-    } else {
-      onChatList()
-    }
-  });
+const handlerReceiveMsg = (data) => {
+  onChatList()
+  if (selectedUser.value.fromId === data.fromId || (data.source === 'group' && selectedUser.value.fromId === data.toId)) {
+    onRead()
+  }
 }
 
 const onRead = () => {
   ChatListApi.read(selectedUser.value.fromId).then(res => {
     if (res.code === 0) {
       onChatList()
+      EventBus.emit('on-refresh-unread')
     }
   })
 }
@@ -159,8 +164,26 @@ watch(selectedUser, () => {
       cursor: pointer;
       user-select: none;
 
+      .qun {
+        height: 18px;
+        width: 18px;
+        font-size: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 5px;
+        border: #4C9BFF 1px solid;
+        margin-left: 5px;
+        color: #4C9BFF;
+      }
+
       &.selected {
         background-color: var(--primary-color);
+
+        .qun {
+          border: #ffffff 1px solid;
+          color: #ffffff;
+        }
 
         &:hover {
           background-color: var(--primary-color);

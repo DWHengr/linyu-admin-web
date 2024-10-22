@@ -27,5 +27,8 @@ export default {
     },
     cancelAdmin(param) {
         return Http.post("/admin/v1/api/user/cancel/admin", param)
-    }
+    },
+    unread() {
+        return Http.get(`/v1/api/user/unread`)
+    },
 };
