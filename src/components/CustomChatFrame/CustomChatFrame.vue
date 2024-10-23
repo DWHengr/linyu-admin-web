@@ -21,15 +21,19 @@
             icon="iconfont icon-biaoqing"
             icon-style="font-size:22px"
             class="operate-icon"
+            @click="handlerSetExpressPosition"
         />
-        <CustomIconfontButton
-            icon="iconfont icon-wenjian"
-            icon-style="font-size:24px"
-            class="operate-icon"
-        />
+        <CustomOverlay v-model:visible="isExpressionVisible" :position="expressionPosition">
+          <CustomExpressionPop @on-complete="handlerAddEmoji"/>
+        </CustomOverlay>
+        <!--        <CustomIconfontButton-->
+        <!--            icon="iconfont icon-wenjian"-->
+        <!--            icon-style="font-size:24px"-->
+        <!--            class="operate-icon"-->
+        <!--        />-->
       </div>
       <div class="flex-1">
-        <CustomTextarea v-model:value="msgContent" placeholder="请输入聊天内容~"/>
+        <CustomTextarea ref="textareaRef" v-model:value="msgContent" placeholder="请输入聊天内容~"/>
       </div>
       <div class="w-full p-[10px]">
         <CustomButton class="ml-auto" @click="onSendMessage">发送</CustomButton>
@@ -46,6 +50,9 @@ import MessageApi from "@/api/message.js";
 import MsgContent from "@/components/CustomChatFrame/ChatContent/MsgContent.vue";
 import CustomTextarea from "@/components/CustomTextarea.vue";
 import EventBus from "@/utils/eventBus.js";
+import CustomPopover from "@/components/CustomPopover.vue";
+import CustomExpressionPop from "@/components/CustomExpressionPop.vue";
+import CustomOverlay from "@/components/CustomOverlay.vue";
 
 let currentMsgRecordIndex = 0;
 const messages = ref([]);
@@ -54,6 +61,9 @@ const isLoading = ref(false);
 const isComplete = ref(false);
 const currentUserId = ref(sessionStorage.getItem('userId'));
 const msgContent = ref('')
+const isExpressionVisible = ref(false)
+const expressionPosition = ref(null)
+const textareaRef = ref(null)
 
 const props = defineProps({
   chatInfo: Object,
@@ -81,6 +91,22 @@ const handlerReceiveMsg = (data) => {
   }
 }
 
+const handlerAddEmoji = (emoji) => {
+  const textarea = textareaRef.value.getTextarea()
+  if (!textarea) return
+  const start = textarea.selectionStart
+  const end = textarea.selectionEnd
+  const before = msgContent.value.substring(0, start)
+  const after = msgContent.value.substring(end)
+  msgContent.value = before + emoji + after
+  isExpressionVisible.value = false
+  nextTick(() => {
+    const newPosition = start + emoji.length
+    textarea.setSelectionRange(newPosition, newPosition)
+    textarea.focus()
+  })
+}
+
 watch(() => props.chatInfo, () => {
   currentMsgRecordIndex = 0;
   messages.value = [];
@@ -93,6 +119,12 @@ const scrollToBottom = () => {
     messagesRef.value.scrollTop = messagesRef.value.scrollHeight;
   }
 };
+
+const handlerSetExpressPosition = (e) => {
+  const rect = e.target.getBoundingClientRect()
+  expressionPosition.value = {top: -205, left: 5}
+  isExpressionVisible.value = true
+}
 
 const onMessageRecord = () => {
   if (isLoading.value || isComplete.value) return;
@@ -196,6 +228,7 @@ const handleScroll = () => {
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
+    position: relative;
 
     .operate-icon {
       background-color: transparent;

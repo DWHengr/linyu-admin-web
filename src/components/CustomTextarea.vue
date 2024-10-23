@@ -1,13 +1,24 @@
 <template>
-  <textarea class="textarea" v-model="value" :placeholder="placeholder"></textarea>
+  <textarea ref="textareaRef" class="textarea" v-model="value" :placeholder="placeholder"></textarea>
 </template>
 <script setup>
-import {defineProps, defineModel} from 'vue';
+import {defineProps, defineModel, ref, defineExpose} from 'vue';
 
 const props = defineProps({
   placeholder: String
 })
+const textareaRef = ref(null)
+
 const value = defineModel('value')
+
+defineExpose({
+  focus() {
+    textareaRef.value?.focus()
+  },
+  getTextarea() {
+    return textareaRef.value
+  }
+})
 </script>
 <style lang="less" scoped>
 .textarea {

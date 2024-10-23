@@ -10,7 +10,7 @@
     </div>
     <div class="chat-list">
       <div class="h-[60px] text-[28px] leading-[28px] flex items-center font-[600]">聊天列表</div>
-      <CustomSearchInput placeholder="搜索" style="margin-bottom: 15px;margin-top: 0"/>
+      <CustomSearchInput v-model:value="userSearch" placeholder="搜索" style="margin-bottom: 15px;margin-top: 0"/>
       <div class="flex-1 flex flex-col overflow-y-scroll pr-[5px]">
         <div v-for="item in userChatListData"
              class="chat-card"
@@ -68,7 +68,7 @@
 <script setup>
 
 import CustomSearchInput from "@/components/CustomSearchInput.vue";
-import {ref, defineEmits, onMounted, nextTick, watch, onUnmounted} from "vue";
+import {defineEmits, onMounted, onUnmounted, ref, watch} from "vue";
 import CustomChatFrame from "@/components/CustomChatFrame/CustomChatFrame.vue";
 import CustomIconfontButton from "@/components/CustomIconfontButton.vue";
 import ChatListApi from "@/api/chatList.js";
@@ -81,6 +81,8 @@ defineEmits(["close"])
 
 const selectedUser = ref(null)
 const userChatListData = ref([])
+const allUserChatListData = ref([])
+const userSearch = ref('')
 
 onMounted(() => {
   onChatList()
@@ -91,10 +93,19 @@ onUnmounted(() => {
   EventBus.off('on-receive-msg', handlerReceiveMsg)
 })
 
+watch(userSearch, () => {
+  if (userSearch.value) {
+    userChatListData.value = allUserChatListData.value.filter(item => item.name.includes(userSearch.value))
+  } else {
+    userChatListData.value = allUserChatListData.value
+  }
+})
+
 const onChatList = () => {
   ChatListApi.chatList().then(res => {
     if (res.code === 0) {
       userChatListData.value = [...res.data?.tops, ...res.data.others]
+      allUserChatListData.value = userChatListData.value
     }
   })
 }
@@ -150,6 +161,7 @@ watch(selectedUser, () => {
     overflow: hidden;
     border-right: 1px solid #E1E0E0;
     flex-shrink: 0;
+
 
     .chat-card {
       width: 100%;

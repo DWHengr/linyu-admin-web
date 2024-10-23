@@ -37,5 +37,6 @@ defineEmits(["click"])
   border-radius: 5px;
   background-color: #FFFFFF;
   cursor: pointer;
+  position: relative;
 }
 </style>
