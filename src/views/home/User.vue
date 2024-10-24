@@ -97,6 +97,9 @@
               <div v-if="item.role==='admin'" class="ml-[4px] flex items-center text-[var(--primary-color)]">
                 <i class="iconfont icon-guanliyuan" style="font-size: 18px;"/>
               </div>
+              <div v-if="item.role==='third'" class="ml-[4px] flex items-center text-[#FEB633]">
+                <i class="iconfont icon-huiyuan" style="font-size: 18px;"/>
+              </div>
             </div>
             <div class="flex flex-shrink-0">
               <div class="mr-[4px]">{{ calculateAge(item.birthday) }}岁</div>
