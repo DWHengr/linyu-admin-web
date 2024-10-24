@@ -7,14 +7,14 @@
         accept="image/*"
         style="display: none"
     >
-    <div @click="triggerFileInput" v-if="!preview" class="image-button">
+    <div @click="triggerFileInput" v-if="!preview" class="image-button" :style="props.buttonStyle">
       <i class="iconfont icon-tianjia" style="font-size: 50px"/>
     </div>
-    <div v-if="preview" class="image-preview">
+    <div v-if="preview" class="image-preview" :style="props.previewStyle">
       <div class="image-preview-del">
         <CustomIconfontButton
-            icon="iconfont icon-guanbi rounded-[2px]"
-            icon-style="font-size:24px;background-color:#ff4c4c;color:#fff"
+            icon="iconfont icon-shanchu rounded-[2px]"
+            icon-style="font-size:22px;background-color:#ff4c4c;color:#fff"
             @click="onCancel"
         />
       </div>
@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import {ref, watch} from 'vue'
+import {defineProps, ref, watch} from 'vue'
 import CustomIconfontButton from "@/components/CustomIconfontButton.vue";
 
 const fileInput = ref(null)
@@ -32,6 +32,27 @@ const file = ref(null)
 const preview = ref(null)
 
 const value = defineModel("value")
+const props = defineProps({
+  buttonStyle: String,
+  previewStyle: String,
+})
+
+const urlToFile = async (url) => {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  const fileName = "portrait"; // 从URL中获取文件名
+  return new File([blob], fileName, {type: blob.type});
+}
+
+
+watch(() => value.value, () => {
+  if (typeof value.value === 'string') {
+    preview.value = value.value
+    urlToFile(value.value).then(res => {
+      file.value = res
+    })
+  }
+}, {immediate: true})
 
 const triggerFileInput = () => {
   fileInput.value.click()
@@ -87,12 +108,18 @@ watch(value, () => {
 
   .image-preview {
     width: 100%;
+    height: 100%;
     position: relative;
+    overflow: hidden;
 
     .image-preview-del {
       position: absolute;
-      top: 5px;
-      right: 5px;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      background-color: rgba(0, 0, 0, .3);
+      justify-content: center;
+      align-items: center;
       opacity: 0;
       transition: opacity 0.3s ease;
     }
