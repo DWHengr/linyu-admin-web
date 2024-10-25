@@ -41,6 +41,12 @@
         <div class="option" @click="handlerShowKey">显示秘钥</div>
         <div class="option" @click="resetSecretIsOpen=true;moreIsVisible=false">重置秘钥</div>
         <div class="option" @click="handlerUpdateConversationInfo">修改信息</div>
+        <div class="option" v-if="currentSelectedConversation?.status === 'normal'" @click="onDisableConversation">
+          禁用
+        </div>
+        <div class="option" v-if="currentSelectedConversation?.status === 'disable'" @click="onUnDisableConversation">
+          解禁
+        </div>
         <div class="option" @click="delConversationIsOpen=true;moreIsVisible=false">删除</div>
       </div>
     </CustomPopover>
@@ -91,7 +97,7 @@
         </div>
         <div class="h-[40px] border-t-[2px] border-t-[#EDF2F9] flex-shrink-0 flex justify-center items-center">
           <div v-if="item.status==='normal'" class="font-[600] text-[20px] text-[var(--primary-color)]">已启用</div>
-          <div v-if="item.status==='disabled'" class="font-[600] text-[20px] text-[#ff4c4c]">已禁用</div>
+          <div v-if="item.status==='disable'" class="font-[600] text-[20px] text-[#ff4c4c]">已禁用</div>
         </div>
       </div>
     </div>
@@ -142,6 +148,23 @@ const onConversationList = () => {
   ConversationApi.list().then(res => {
     if (res.code === 0) {
       conversationData.value = res.data
+    }
+  })
+}
+
+const onUnDisableConversation = () => {
+  ConversationApi.unDisable({conversationId: currentSelectedConversation.value.id}).then(res => {
+    if (res.code === 0) {
+      showToast("解禁成功~")
+      onConversationList()
+    }
+  })
+}
+const onDisableConversation = () => {
+  ConversationApi.disable({conversationId: currentSelectedConversation.value.id}).then(res => {
+    if (res.code === 0) {
+      showToast("禁用成功~")
+      onConversationList()
     }
   })
 }

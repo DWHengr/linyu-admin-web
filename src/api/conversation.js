@@ -15,5 +15,11 @@ export default {
     },
     resetSecret(param) {
         return Http.post("/admin/v1/api/conversation/reset/secret", param)
-    }
+    },
+    disable(param) {
+        return Http.post("/admin/v1/api/conversation/disable", param)
+    },
+    unDisable(param) {
+        return Http.post("/admin/v1/api/conversation/undisable", param)
+    },
 };
